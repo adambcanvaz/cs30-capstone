@@ -1,7 +1,7 @@
 //—— USER INTERFACE SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
 
 class UI {
-  constructor(){
+  constructor() {
     //———————— DIMENSIONS ————————
     this.panelX = 0;
     this.panelY = 0;
@@ -17,14 +17,14 @@ class UI {
     this.slotRects = [];  // stores the hitbox variables for each slot
 
     //———————— INTERACTIVE ELEMENTS ————————
-    this.leftArrowHitbox = {x: 0, y: 0, w: 44, h: 44};
-    this.rightArrowHitbox = {x: 0, y: 0, w: 44, h: 44};
+    this.leftArrowHitbox = { x: 0, y: 0, w: 44, h: 44 };
+    this.rightArrowHitbox = { x: 0, y: 0, w: 44, h: 44 };
 
     //———————— INPUT STATE ————————
     this.prevMouseDown = false; // Flag to detect a single click event
   }
 
-  layout(){
+  layout() {
     // Calculates positions and sizes for all UI elements
 
     //———————— MARGINS/PADDING ————————
@@ -35,14 +35,14 @@ class UI {
     //———————— PANEL POSITIONING/SIZE ————————
     this.panelWidth = 260;
     this.panelY = TOP_MARGIN;
-    this.panelHeight = height-this.panelY-BOTTOM_MARGIN;
-    this.panelX = width-this.panelWidth-PANEL_PADDING;
+    this.panelHeight = height - this.panelY - BOTTOM_MARGIN;
+    this.panelX = width - this.panelWidth - PANEL_PADDING;
 
     //———————— ARROW POSITIONS ————————
-    this.leftArrowHitbox.x = this.panelX+PANEL_PADDING;
-    this.leftArrowHitbox.y = this.panelY+PANEL_PADDING;
-    this.rightArrowHitbox.x = this.panelX+this.panelWidth-PANEL_PADDING-this.rightArrowHitbox.w;
-    this.rightArrowHitbox.y = this.panelY+PANEL_PADDING;
+    this.leftArrowHitbox.x = this.panelX + PANEL_PADDING;
+    this.leftArrowHitbox.y = this.panelY + PANEL_PADDING;
+    this.rightArrowHitbox.x = this.panelX + this.panelWidth - PANEL_PADDING - this.rightArrowHitbox.w;
+    this.rightArrowHitbox.y = this.panelY + PANEL_PADDING;
 
     //———————— SLOT POSITIONS ————————
     this.slotRects = [];
@@ -51,19 +51,19 @@ class UI {
     let SLOT_HEIGHT = 78;
     let SLOT_GAP = 12;
 
-    for (let i = 0; i < this.slotCount; i++){
+    for (let i = 0; i < this.slotCount; i++) {
       //holds the calculated dimensions for the current slot's hitbox
       let slotRect = {
-        x: this.panelX+PANEL_PADDING,
-        y: SLOTS_START_Y+(i*(SLOT_HEIGHT+SLOT_GAP)),
-        w: this.panelWidth-(PANEL_PADDING*2),
+        x: this.panelX + PANEL_PADDING,
+        y: SLOTS_START_Y + (i * (SLOT_HEIGHT + SLOT_GAP)),
+        w: this.panelWidth - (PANEL_PADDING * 2),
         h: SLOT_HEIGHT
       };
       this.slotRects.push(slotRect);
     }
   }
 
-  pointInHitbox(pointX, pointY, rectDimensions){
+  pointInHitbox(pointX, pointY, rectDimensions) {
     //helper that returns true if clicked inside hitbox
     return pointX >= rectDimensions.x &&
       pointX <= rectDimensions.x + rectDimensions.w &&
@@ -76,30 +76,30 @@ class UI {
     return this.categories[this.categoryIndex];
   }
 
-  getCategoryIngredients(currentDay){
+  getCategoryIngredients(currentDay) {
     // returns ingredients for curr category, by day
     let categoryKey = this.getCategoryKey();
     return getCategoryItemsByDay(categoryKey, currentDay);
   }
 
-  update(currentDay, burger){
+  update(currentDay, burger) {
     // handles clicks on arrows and slots
 
     let mouseDown = mouseIsPressed;
     // prevents multiple clicks from being registered
     let clicked = mouseDown && !this.prevMouseDown;
     this.prevMouseDown = mouseDown;
-    if (!clicked) return; 
+    if (!clicked) return;
 
     //———————— ARROW CLICKS ————————
-    if (this.pointInHitbox(mouseX, mouseY, this.leftArrowHitbox)){
+    if (this.pointInHitbox(mouseX, mouseY, this.leftArrowHitbox)) {
       this.categoryIndex--;
       //wrap around
       if (this.categoryIndex < 0) this.categoryIndex = this.categories.length - 1;
       return;
     }
 
-    if (this.pointInHitbox(mouseX, mouseY, this.rightArrowHitbox)){
+    if (this.pointInHitbox(mouseX, mouseY, this.rightArrowHitbox)) {
       this.categoryIndex++;
       if (this.categoryIndex >= this.categories.length) this.categoryIndex = 0;
       return;
@@ -108,7 +108,7 @@ class UI {
     //———————— SLOT CLICKS ————————
     let availableIngredients = this.getCategoryIngredients(currentDay);
 
-    for (let i = 0; i < this.slotRects.length; i++){
+    for (let i = 0; i < this.slotRects.length; i++) {
       if (i >= availableIngredients.length) break; //skip if no ingredient for slot
       let slotRect = this.slotRects[i];
 
@@ -120,7 +120,7 @@ class UI {
     }
   }
 
-  display(currentDay, loadedImages){
+  display(currentDay, loadedImages) {
     // Draws the whole UI panel
 
     //———————— BACKGROUND ————————
@@ -136,7 +136,7 @@ class UI {
     fill(255);
     textAlign(CENTER, CENTER);
     textSize(24);
-    text(this.uppercaseCategoryName(categoryKey), this.panelX+(this.panelWidth/2), this.panelY+42);
+    text(this.uppercaseCategoryName(categoryKey), this.panelX + (this.panelWidth / 2), this.panelY + 42);
     pop();
 
     //———————— ARROWS ————————
@@ -168,7 +168,7 @@ class UI {
     }
   }
 
-  drawArrowButton(hitbox, label){
+  drawArrowButton(hitbox, label) {
     // draws arrows
     push();
     noFill();
@@ -181,7 +181,7 @@ class UI {
     pop();
   }
 
-  uppercaseCategoryName(key){
+  uppercaseCategoryName(key) {
     //returns uppercase header
     if (key === "buns") return "BUNS";
     if (key === "proteins") return "PROTEINS";

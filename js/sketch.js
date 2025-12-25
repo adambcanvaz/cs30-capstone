@@ -1,20 +1,21 @@
 //—— MAIN BACKBONE ——————————————————————————————————————————————————————————————————————————————————————
 
 let loadedAssets = {};
-let currentDay = 2;
+let currentDay = 1;
 let ui;
 let uiFont;
 let burger;
+let currentOrder;
 
-function preload(){
+function preload() {
   //UI Font
   uiFont = loadFont("assets/fonts/ChelseaMarket-Regular.ttf");
 
   //Loads all ingredient image assets
-  for (let categoryKey in INGREDIENTS){
+  for (let categoryKey in INGREDIENTS) {
     let ingredientItems = INGREDIENTS[categoryKey];
 
-    for (let i = 0; i < ingredientItems.length; i++){ // goes through each ingredient in category
+    for (let i = 0; i < ingredientItems.length; i++) { // goes through each ingredient in category
       let item = ingredientItems[i];
       loadedAssets[item.id] = loadImage(item.img); //store the ingredient's image
     }
@@ -29,6 +30,8 @@ function setup() {
   burger = new Burger();
   ui = new UI();
   ui.layout();
+
+  currentOrder = new Order(currentDay);
 }
 
 function draw() {
@@ -42,6 +45,9 @@ function draw() {
   //———————— USER INTERFACE ————————
   ui.update(currentDay, burger);
   ui.display(currentDay, loadedAssets);
+
+  //———————— ORDER ————————
+
 }
 
 
@@ -49,10 +55,10 @@ function draw() {
 
 function keyPressed() {
   // Clear burger
-  if (key === "c" || key === "C"){
+  if (key === "c" || key === "C") {
     burger.clear();
-  // Undoes prev ingredient
-  } else if (key === "z" || key === "Z"){
+    // Undoes prev ingredient
+  } else if (key === "z" || key === "Z") {
     burger.undo();
   }
 }

@@ -119,15 +119,15 @@ const INGREDIENTS = {
   ]
 };
 
-function getAvailableIngredients(currentDay){
+function getAvailableIngredients(currentDay) {
   //Returns ingredients available for the day
   let dailyAvailableList = [];
 
-  for (let categoryKey in INGREDIENTS){
+  for (let categoryKey in INGREDIENTS) {
     let ingredientsList = INGREDIENTS[categoryKey];
-    for (let i = 0; i < ingredientsList.length; i++){
+    for (let i = 0; i < ingredientsList.length; i++) {
       let ingredientItem = ingredientsList[i];
-      if (ingredientItem.unlockDay <= currentDay){ // checks if item is available
+      if (ingredientItem.unlockDay <= currentDay) { // checks if item is available
         dailyAvailableList.push(ingredientItem);
       }
     }
@@ -136,27 +136,27 @@ function getAvailableIngredients(currentDay){
   return dailyAvailableList;
 }
 
-function getCategoryItemsByDay(categoryKey, currentDay){
+function getCategoryItemsByDay(categoryKey, currentDay) {
   //Returns ingredients available for a specific category for the day
-    let categoryArray = INGREDIENTS[categoryKey];
-    let filteredIngredients = [];
+  let categoryArray = INGREDIENTS[categoryKey];
+  let filteredIngredients = [];
 
-    for (let i = 0; i < categoryArray.length; i++) {
-        let item = categoryArray[i];
-        if (item.unlockDay <= currentDay) {
-            filteredIngredients.push(item);
-        }
+  for (let i = 0; i < categoryArray.length; i++) {
+    let item = categoryArray[i];
+    if (item.unlockDay <= currentDay) {
+      filteredIngredients.push(item);
     }
-    return filteredIngredients;
+  }
+  return filteredIngredients;
 }
 
-function getIngredientById(targetId){
+function getIngredientById(targetId) {
   // find and return the ingredient by its ID
-  for (let categoryKey in INGREDIENTS){
+  for (let categoryKey in INGREDIENTS) {
     let ingredientsList = INGREDIENTS[categoryKey];
-    for (let i = 0; i < ingredientsList.length; i++){ //loop thru every ing
+    for (let i = 0; i < ingredientsList.length; i++) { //loop thru every ing
       let ingredientItem = ingredientsList[i];
-      if (ingredientItem.id === targetId){ // checks and returns if satisfeid
+      if (ingredientItem.id === targetId) { // checks and returns if satisfeid
         return ingredientItem;
       }
     }
