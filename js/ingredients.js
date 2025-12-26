@@ -21,7 +21,9 @@ const INGREDIENTS = {
       id: "beef",
       img: "assets/food/proteins/halfpound_cooked.png",
       unlockDay: 1,
-      type: "protein"
+      type: "protein",
+      xOffset: 0,
+      yOffset: -4
     },
     {
       id: "chicken",
@@ -48,13 +50,17 @@ const INGREDIENTS = {
       id: "american_cheese",
       img: "assets/food/cheese/american_slice.png",
       unlockDay: 2,
-      type: "cheese"
+      type: "cheese",
+      xOffset: -1,
+      yOffset: 1
     },
     {
       id: "cheddar_cheese",
       img: "assets/food/cheese/cheddar_slice.png",
       unlockDay: 5,
-      type: "cheese"
+      type: "cheese",
+      xOffset: -1,
+      yOffset: 1
     }
   ],
 

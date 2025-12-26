@@ -1,12 +1,13 @@
 //—— USER INTERFACE SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
 
-class UI {
+class IngredientUI {
   constructor() {
     //———————— DIMENSIONS ————————
     this.panelX = 0;
     this.panelY = 0;
     this.panelWidth = 260;
     this.panelHeight = 520;
+    this.radius = 20;
 
     //———————— CATEGORY NAVIGATION ————————
     this.categories = ["buns", "proteins", "cheese", "veggies", "sauces"];
@@ -46,10 +47,10 @@ class UI {
 
     //———————— SLOT POSITIONS ————————
     this.slotRects = [];
-    let HEADER_HEIGHT = 90;
-    let SLOTS_START_Y = this.panelY + HEADER_HEIGHT;
-    let SLOT_HEIGHT = 78;
-    let SLOT_GAP = 12;
+    const HEADER_HEIGHT = 90;
+    const SLOTS_START_Y = this.panelY + HEADER_HEIGHT;
+    const SLOT_HEIGHT = 78;
+    const SLOT_GAP = 12;
 
     for (let i = 0; i < this.slotCount; i++) {
       //holds the calculated dimensions for the current slot's hitbox
@@ -92,16 +93,28 @@ class UI {
     if (!clicked) return;
 
     //———————— ARROW CLICKS ————————
+    // MOVE BACK
     if (this.pointInHitbox(mouseX, mouseY, this.leftArrowHitbox)) {
       this.categoryIndex--;
-      //wrap around
       if (this.categoryIndex < 0) this.categoryIndex = this.categories.length - 1;
+
+      //Move back again if category is empty
+      while (getCategoryItemsByDay(this.getCategoryKey(), currentDay).length === 0) {
+        this.categoryIndex--;
+        if (this.categoryIndex < 0) this.categoryIndex = this.categories.length - 1;
+      }
       return;
     }
 
+    // MOVE FORWARD
     if (this.pointInHitbox(mouseX, mouseY, this.rightArrowHitbox)) {
       this.categoryIndex++;
       if (this.categoryIndex >= this.categories.length) this.categoryIndex = 0;
+
+      while (getCategoryItemsByDay(this.getCategoryKey(), currentDay).length === 0) {
+        this.categoryIndex++;
+        if (this.categoryIndex >= this.categories.length) this.categoryIndex = 0;
+      }
       return;
     }
 
@@ -127,7 +140,7 @@ class UI {
     push();
     noStroke();
     fill(25);
-    rect(this.panelX, this.panelY, this.panelWidth, this.panelHeight);
+    rect(this.panelX, this.panelY, this.panelWidth, this.panelHeight, this.radius);
     pop();
 
     //———————— CATEGORY HEADER ————————
@@ -155,7 +168,7 @@ class UI {
 
       // Draw the ingredient icon
       if (ingredientImage !== undefined) {
-        let ICON_MAX_HEIGHT = slotRect.h * 0.75;
+        const ICON_MAX_HEIGHT = slotRect.h * 0.75;
         let scaleFactor = ICON_MAX_HEIGHT / ingredientImage.height;
         let iconWidth = ingredientImage.width * scaleFactor;
         let iconHeight = ingredientImage.height * scaleFactor;

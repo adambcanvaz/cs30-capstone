@@ -7,6 +7,20 @@ class Burger {
 
   addIngredient(ingredientId) {
     // Function adds ingredient to stack.
+
+    //———————— RULES/LIMITATIONS ————————
+    // First item must be bottom bun
+    if (this.burgerStack.length === 0) {
+      if (ingredientId !== "bun_bottom") return false;
+    }
+
+    // Last item can only be top bun
+    let lastIndex = this.burgerStack.length - 1;
+    if (this.burgerStack.length > 0 && this.burgerStack[lastIndex] === "bun_top") {
+      return false;
+    }
+
+    // Adds to stack if conditions met
     this.burgerStack.push(ingredientId);
     return true;
   }
@@ -18,19 +32,26 @@ class Burger {
       let ingredientImage = loadedAssets[ingredientId];
 
       //———————— STACKING AND POSITIONING logic ————————
-      // Each higher ingredient moves up a fixed amount (25px).
-      let ingredientHeightIndex = i;
-      let ingredientYOffset = -ingredientHeightIndex * 15;
-      let finalYPosition = baseY + ingredientYOffset;
+      //Get data for ingredient adjustment values
+      let data = getIngredientById(ingredientId);
+
+      //Apply offset adjustments (otherwise 0)
+      if(!data.xOffset) adjustX = 0;
+      else adjustX = data.xOffset;
+      if(!data.yOffset) adjustY = 0;
+      else adjustY = data.yOffset;
+
+      //Stacking position
+      let ingredientYOffset = -i*12; // Adjusted for a tighter stack
+      let finalX = centerX + adjustX;
+      let finalY = baseY + ingredientYOffset + adjustY;
 
       //———————— SCALING logic ————————
-      let targetWidth = 120; // all ingredients scaled to this width
-      let scaleFactor = targetWidth / ingredientImage.width;
-      let finalWidth = ingredientImage.width * scaleFactor;
-      let finalHeight = ingredientImage.height * scaleFactor;
+      let targetWidth = 150; // all ingredients scaled to this width
+      let scaleFactor = ingredientImage.height / ingredientImage.width;
+      let finalHeight = targetWidth * scaleFactor;
 
-      image(ingredientImage, centerX, finalYPosition,
-        finalWidth, finalHeight); // draw ingredient
+      image(ingredientImage, finalX, finalY, targetWidth, finalHeight); // draw ingredient
     }
   }
 
