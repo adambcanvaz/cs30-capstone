@@ -28,6 +28,7 @@ class Burger {
   display(centerX, baseY) {
     // Draw each ingredient from index 0 to top
     for (let i = 0; i < this.burgerStack.length; i++) {
+      let adjustX, adjustY;
       let ingredientId = this.burgerStack[i];
       let ingredientImage = loadedAssets[ingredientId];
 
