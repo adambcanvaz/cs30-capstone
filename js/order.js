@@ -1,5 +1,8 @@
 //—— ORDERING SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
 
+let priceMarkup = 1.5; // inflation...
+let serviceFee = 3.00;
+
 class Order {
   constructor(currentDay) {
     this.targetStack = [];
@@ -50,14 +53,14 @@ class Order {
     this.targetStack.push("bun_top"); //always end with top bun last
   }
 
-  //helper to randomly pick a single item
   pickOneItem(sourceList) {
+    //helper to randomly pick a single item
     let item = floor(random(0, sourceList.length));
     return sourceList[item];
   }
 
-  //helper to randomly pick multiple items (without same item more than once)
   pickMultipleItems(sourceList, amountNeeded) {
+    //helper to randomly pick multiple items (without same item more than once)
     let chosenIngredients = [];
 
     //limits to the max available items if asked for more than available
@@ -77,5 +80,55 @@ class Order {
       if (!alreadyChosen) chosenIngredients.push(targetItem);
     }
     return chosenIngredients;
+  }
+
+  checkOrderMatch(builtStack){
+    //compares the player's built burger to the target order
+
+    //if length doesn't match, return false w/out detail checking
+    if(builtStack.length !== this.targetStack.length){
+      return false;
+    }
+
+    //if length DOES match, check each ingredient
+    for(let i=0; i < this.targetStack.length; i++){
+      if(builtStack[i] !== this.targetStack[i]){
+        return false;
+      }
+    }
+
+    return true; //pass matching check
+  }
+
+  serveOrder(){
+    //serves order after order is matched
+    if(key === ' '){
+      let isCorrect = currentOrder.checkOrderMatch(burger.burgerStack);
+
+      if(isCorrect){
+        let targetRevenue = currentOrder.calculatePrice(priceMarkup, serviceFee);
+        cash += targetRevenue;
+
+        burger.clear();
+        currentOrder = new Order(currentDay);
+      }
+    }
+  }
+
+  calculatePrice(priceMarkup, serviceFee){
+    //calculates target price of customer's order
+    let baseCost = 0;
+
+    for(let i = 0; i < this.targetStack.length; i++){
+      let id = this.targetStack[i];
+      let data = getIngredientById(id);
+
+      if(data && data.cost){
+        baseCost += data.cost;
+      }
+    }
+
+    let finalPrice = (baseCost*priceMarkup) + serviceFee;
+    return finalPrice;
   }
 }
