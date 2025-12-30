@@ -30,27 +30,27 @@ class Burger {
     for (let i = 0; i < this.burgerStack.length; i++) {
       let adjustX, adjustY, adjustScale;
       let ingredientId = this.burgerStack[i];
-      let ingredientImage = loadedAssets[ingredientId];
+      let ingredientImage = ingredientAssets[ingredientId];
 
       //———————— STACKING AND POSITIONING logic ————————
       //Get data for ingredient adjustment values
       let data = getIngredientById(ingredientId);
 
       //Apply offset adjustments (otherwise 0)
-      if(!data.xOffset) adjustX = 0;
+      if (!data.xOffset) adjustX = 0;
       else adjustX = data.xOffset;
-      if(!data.yOffset) adjustY = 0;
+      if (!data.yOffset) adjustY = 0;
       else adjustY = data.yOffset;
-      if(!data.scale) adjustScale = 1;
+      if (!data.scale) adjustScale = 1;
       else adjustScale = data.scale;
 
       //Stacking position
-      let ingredientYOffset = -i*12; // Adjusted for a tighter stack
+      let ingredientYOffset = -i * 12; // Adjusted for a tighter stack
       let finalX = centerX + adjustX;
       let finalY = baseY + ingredientYOffset + adjustY;
 
       //———————— SCALING logic ————————
-      let targetWidth = 130*adjustScale; // all ingredients scaled to this width (w/ adjustment)
+      let targetWidth = 130 * adjustScale; // all ingredients scaled to this width (w/ adjustment)
       let scaleFactor = ingredientImage.height / ingredientImage.width;
       let finalHeight = targetWidth * scaleFactor;
 

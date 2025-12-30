@@ -10,7 +10,7 @@ class IngredientUI {
     this.radius = 20;
 
     //———————— CATEGORY NAVIGATION ————————
-    this.categories = ["buns", "proteins", "cheese", "veggies", "sauces"];
+    this.categories = ["buns", "fillings", "cheese", "veggies", "extras", "sauces"];
     this.categoryIndex = 0;
 
     //———————— INGREDIENT SLOTS ————————
@@ -80,7 +80,7 @@ class IngredientUI {
   getCategoryIngredients(currentDay) {
     // returns ingredients for curr category, by day
     let categoryKey = this.getCategoryKey();
-    return getCategoryItemsByDay(categoryKey, currentDay);
+    return getCategoryItemsByDay(categoryKey, currentDay, day.unlockedIngredients);
   }
 
   update(currentDay, burger) {
@@ -99,7 +99,7 @@ class IngredientUI {
       if (this.categoryIndex < 0) this.categoryIndex = this.categories.length - 1;
 
       //Move back again if category is empty
-      while (getCategoryItemsByDay(this.getCategoryKey(), currentDay).length === 0) {
+      while (getCategoryItemsByDay(this.getCategoryKey(), currentDay, day.unlockedIngredients).length === 0) {
         this.categoryIndex--;
         if (this.categoryIndex < 0) this.categoryIndex = this.categories.length - 1;
       }
@@ -111,7 +111,7 @@ class IngredientUI {
       this.categoryIndex++;
       if (this.categoryIndex >= this.categories.length) this.categoryIndex = 0;
 
-      while (getCategoryItemsByDay(this.getCategoryKey(), currentDay).length === 0) {
+      while (getCategoryItemsByDay(this.getCategoryKey(), currentDay, day.unlockedIngredients).length === 0) {
         this.categoryIndex++;
         if (this.categoryIndex >= this.categories.length) this.categoryIndex = 0;
       }
@@ -127,8 +127,15 @@ class IngredientUI {
 
       if (this.pointInHitbox(mouseX, mouseY, slotRect)) {
         let chosenIngredient = availableIngredients[i];
-        burger.addIngredient(chosenIngredient.id);
-        return; //stops checking others once one is clicked
+
+        // Check if the player owns this ingredient
+        if (day.unlockedIngredients.includes(chosenIngredient.id)) {
+          if (burger.addIngredient(chosenIngredient.id)) {
+            day.logExpense(chosenIngredient.cost);
+          }
+        }
+        
+        return;
       }
     }
   }
@@ -197,9 +204,10 @@ class IngredientUI {
   uppercaseCategoryName(key) {
     //returns uppercase header
     if (key === "buns") return "BUNS";
-    if (key === "proteins") return "PROTEINS";
+    if (key === "fillings") return "FILLINGS";
     if (key === "cheese") return "CHEESE";
     if (key === "veggies") return "TOPPINGS";
+    if (key === "extras") return "EXTRAS";
     if (key === "sauces") return "SAUCES";
     return key.toUpperCase();
   }

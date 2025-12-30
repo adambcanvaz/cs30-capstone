@@ -1,15 +1,12 @@
 //—— ORDERING SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
 
-let priceMarkup = 1.5; // inflation...
-let serviceFee = 3.00;
-
 class Order {
-  constructor(currentDay) {
+  constructor(currentDay, unlockedIngredients) {
     this.targetStack = [];
-    this.generateRandomOrder(currentDay);
+    this.generateRandomOrder(currentDay, unlockedIngredients);
   }
 
-  generateRandomOrder(day) {
+  generateRandomOrder(day, unlockedIngredients) {
     // Generate a burger order based on category limits
     this.targetStack = [];
 
@@ -17,21 +14,21 @@ class Order {
     this.targetStack.push("bun_bottom"); //always bottom bun first
 
     // makes sure there is at least 1 protein.
-    let availableProteins = getCategoryItemsByDay("proteins", day);
-    if (availableProteins.length > 0) {
-      let randomProtein = this.pickOneItem(availableProteins);
+    let availableFillings = getCategoryItemsByDay("fillings", day, unlockedIngredients);
+    if (availableFillings.length > 0) {
+      let randomProtein = this.pickOneItem(availableFillings);
       this.targetStack.push(randomProtein.id);
     }
 
     //50 percent chance of adding 1 cheese
-    let availableCheeses = getCategoryItemsByDay("cheese", day);
+    let availableCheeses = getCategoryItemsByDay("cheese", day, unlockedIngredients);
     if (availableCheeses.length > 0 && random() > 0.5) {
       let randomCheese = this.pickOneItem(availableCheeses);
       this.targetStack.push(randomCheese.id);
     }
 
     //random veggies (1 to 3)
-    let availableVeggies = getCategoryItemsByDay("veggies", day);
+    let availableVeggies = getCategoryItemsByDay("veggies", day, unlockedIngredients);
     if (availableVeggies.length > 0) {
       let veggieCount = floor(random(1, 4));
       let chosenVeggies = this.pickMultipleItems(availableVeggies, veggieCount);
@@ -40,8 +37,15 @@ class Order {
       }
     }
 
+    //35 percent chance of adding 1 extra
+    let availableExtras = getCategoryItemsByDay("extras", day, unlockedIngredients);
+    if (availableExtras.length > 0 && random() > 0.35) {
+      let randomExtra = this.pickOneItem(availableExtras);
+      this.targetStack.push(randomExtra.id);
+    }
+
     //random sauces (none to 2)
-    let availableSauces = getCategoryItemsByDay("sauces", day);
+    let availableSauces = getCategoryItemsByDay("sauces", day, unlockedIngredients);
     if (availableSauces.length > 0 && random() > 0.5) {
       let sauceCount = floor(random(0, 3));
       let chosenSauces = this.pickMultipleItems(availableSauces, sauceCount);
@@ -82,17 +86,17 @@ class Order {
     return chosenIngredients;
   }
 
-  checkOrderMatch(builtStack){
+  checkOrderMatch(builtStack) {
     //compares the player's built burger to the target order
 
     //if length doesn't match, return false w/out detail checking
-    if(builtStack.length !== this.targetStack.length){
+    if (builtStack.length !== this.targetStack.length) {
       return false;
     }
 
     //if length DOES match, check each ingredient
-    for(let i=0; i < this.targetStack.length; i++){
-      if(builtStack[i] !== this.targetStack[i]){
+    for (let i = 0; i < this.targetStack.length; i++) {
+      if (builtStack[i] !== this.targetStack[i]) {
         return false;
       }
     }
@@ -100,35 +104,47 @@ class Order {
     return true; //pass matching check
   }
 
-  serveOrder(){
+  serveOrder() {
     //serves order after order is matched
-    if(key === ' '){
-      let isCorrect = currentOrder.checkOrderMatch(burger.burgerStack);
+    let isCorrect = currentOrder.checkOrderMatch(burger.burgerStack);
+    let config = day.getConfig();
+    let revenue = this.calculatePrice(config.markupRate, config.serviceFee);
 
-      if(isCorrect){
-        let targetRevenue = currentOrder.calculatePrice(priceMarkup, serviceFee);
-        cash += targetRevenue;
+    if (isCorrect){
+      day.logSale(revenue); // Calculate food sales
 
-        burger.clear();
-        currentOrder = new Order(currentDay);
-      }
+      // Calculate tips (random 5-10%)
+      let tipAmount = revenue*random(0.05, 0.10);
+      day.logTip(tipAmount);
+
+      // Burger XP points (standard rewarrd)
+      day.logPoints(20);
+    } 
+    else {
+      // Order is wrong
+      let customerIsAngry = random() > 0.3; // 30% chance
+      if (customerIsAngry) day.logRefund(revenue); // Refund
+      day.logPoints(10); //partial xp for effort
     }
+
+    burger.clear();
+    currentOrder = new Order(day.currentDay, day.unlockedIngredients);
   }
 
-  calculatePrice(priceMarkup, serviceFee){
+  calculatePrice(priceMarkup, serviceFee) {
     //calculates target price of customer's order
     let baseCost = 0;
 
-    for(let i = 0; i < this.targetStack.length; i++){
+    for (let i = 0; i < this.targetStack.length; i++) {
       let id = this.targetStack[i];
       let data = getIngredientById(id);
 
-      if(data && data.cost){
+      if (data && data.cost) {
         baseCost += data.cost;
       }
     }
 
-    let finalPrice = (baseCost*priceMarkup) + serviceFee;
+    let finalPrice = (baseCost * priceMarkup) + serviceFee;
     return finalPrice;
   }
 }

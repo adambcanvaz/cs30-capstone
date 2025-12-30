@@ -1,4 +1,6 @@
-//—— iNGREDIENTS SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
+//—— INGREDIENTS SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
+
+let ingredientAssets = {};
 
 const INGREDIENTS = {
   buns: [
@@ -18,35 +20,28 @@ const INGREDIENTS = {
     }
   ],
 
-  proteins: [
+  fillings: [
     {
       id: "beef",
-      img: "assets/food/proteins/halfpound_cooked.png",
+      img: "assets/food/fillings/halfpound_cooked.png",
       unlockDay: 1,
-      type: "protein",
+      type: "filling",
       cost: 2.43,
       xOffset: 0,
       yOffset: -4
     },
     {
       id: "chicken",
-      img: "assets/food/proteins/chicken_cooked.png",
-      unlockDay: 4,
-      type: "protein",
+      img: "assets/food/fillings/chicken_cooked.png",
+      unlockDay: 3,
+      type: "filling",
       cost: 3.02
     },
     {
-      id: "bacon",
-      img: "assets/food/proteins/bacon_cooked.png",
-      unlockDay: 4,
-      type: "protein",
-      cost: 1.76 // for 2 strips
-    },
-    {
       id: "veggie_patty",
-      img: "assets/food/proteins/veggie_cooked.png",
-      unlockDay: 6,
-      type: "protein",
+      img: "assets/food/fillings/veggie_cooked.png",
+      unlockDay: 4,
+      type: "filling",
       cost: 3.46,
       scale: 0.94,
       yOffset: -5
@@ -71,6 +66,15 @@ const INGREDIENTS = {
       cost: 0.68,
       xOffset: -1,
       yOffset: 1
+    },
+    {
+      id: "swiss_cheese",
+      img: "assets/food/cheese/swiss_slice.png",
+      unlockDay: 6,
+      type: "cheese",
+      cost: 0.92,
+      xOffset: -1,
+      yOffset: 1
     }
   ],
 
@@ -78,7 +82,7 @@ const INGREDIENTS = {
     {
       id: "lettuce",
       img: "assets/food/veggies/lettuce_leaf.png",
-      unlockDay: 2,
+      unlockDay: 1,
       type: "veggie",
       cost: 0.17
     },
@@ -92,9 +96,19 @@ const INGREDIENTS = {
       yOffset: 2
     },
     {
+      id: "pickles",
+      img: "assets/food/veggies/pickles.png",
+      unlockDay: 3,
+      type: "veggie",
+      cost: 0.37, // for 3 slices
+      scale: 0.85,
+      xOffset: 2,
+      yOffset: 9
+    },
+    {
       id: "red_onion",
       img: "assets/food/veggies/red_onions.png",
-      unlockDay: 3,
+      unlockDay: 4,
       type: "veggie",
       cost: 0.42, // for 3 rings
       scale: 0.90,
@@ -103,7 +117,7 @@ const INGREDIENTS = {
     {
       id: "mushrooms",
       img: "assets/food/veggies/cooked_mushrooms.png",
-      unlockDay: 5,
+      unlockDay: 4,
       type: "veggie",
       cost: 0.50,
       scale: 0.65, // for 6 pieces
@@ -111,13 +125,61 @@ const INGREDIENTS = {
       xOffset: 1
     },
     {
-      id: "jalapeno",
-      img: "assets/food/veggies/jalapeno_peppers.png",
-      unlockDay: 5,
+      id: "bell_peppers",
+      img: "assets/food/veggies/bell_peppers.png",
+      unlockDay: 7,
       type: "veggie",
+      cost: 0.81, // for 3 slices
+      scale: 0.90,
+      yOffset: 3
+    }
+  ],
+
+  extras: [
+    {
+      id: "bacon",
+      img: "assets/food/extras/bacon.png",
+      unlockDay: 5,
+      type: "extras",
+      cost: 1.76, // for 2 strips
+      yOffset: 6
+    },
+    {
+      id: "sausage",
+      img: "assets/food/extras/sausage.png",
+      unlockDay: 7,
+      type: "extras",
+      cost: 1.60 // for 3 slices
+    },
+    {
+      id: "fried_egg",
+      img: "assets/food/extras/fried_egg.png",
+      unlockDay: 7,
+      type: "extras",
+      cost: 0.91
+    },
+    {
+      id: "jalapeno",
+      img: "assets/food/extras/jalapeno_peppers.png",
+      unlockDay: 6,
+      type: "extras",
       cost: 0.44, // for 4 slices
       scale: 0.75,
       yOffset: 2
+    },
+    {
+      id: "chili",
+      img: "assets/food/extras/chili_peppers.png",
+      unlockDay: 6,
+      type: "extras",
+      cost: 1.12 // for 4 slices
+    },
+    {
+      id: "fried_onion",
+      img: "assets/food/extras/fried_onion.png",
+      unlockDay: 7,
+      type: "extras",
+      cost: 1.16, // for 4 slices
     }
   ],
 
@@ -127,28 +189,42 @@ const INGREDIENTS = {
       img: "assets/food/sauces/ketchup_sauce.png",
       unlockDay: 1,
       type: "sauce",
-      cost: 0.10
+      cost: 0.15
     },
     {
       id: "mustard",
       img: "assets/food/sauces/mustard_sauce.png",
-      unlockDay: 3,
+      unlockDay: 2,
       type: "sauce",
-      cost: 0.10
+      cost: 0.15
     },
     {
       id: "mayo",
       img: "assets/food/sauces/mayo_sauce.png",
       unlockDay: 3,
       type: "sauce",
-      cost: 0.10
+      cost: 0.15
+    },
+    {
+      id: "bbq",
+      img: "assets/food/sauces/bbq_sauce.png",
+      unlockDay: 5,
+      type: "sauce",
+      cost: 0.35
+    },
+    {
+      id: "wasabi",
+      img: "assets/food/sauces/wasabi_sauce.png",
+      unlockDay: 6,
+      type: "sauce",
+      cost: 0.65
     },
     {
       id: "restaurant_sauce",
       img: "assets/food/sauces/burger_sauce.png",
-      unlockDay: 6,
+      unlockDay: 7,
       type: "sauce",
-      cost: 0.10
+      cost: 1.00
     }
   ]
 };
@@ -170,14 +246,14 @@ function getAvailableIngredients(currentDay) {
   return dailyAvailableList;
 }
 
-function getCategoryItemsByDay(categoryKey, currentDay) {
+function getCategoryItemsByDay(categoryKey, currentDay, unlockedIngredients) {
   //Returns ingredients available for a specific category for the day
   let categoryArray = INGREDIENTS[categoryKey];
   let filteredIngredients = [];
 
   for (let i = 0; i < categoryArray.length; i++) {
     let item = categoryArray[i];
-    if (item.unlockDay <= currentDay) {
+    if (item.unlockDay <= currentDay && unlockedIngredients && unlockedIngredients.includes(item.id)) {
       filteredIngredients.push(item);
     }
   }
@@ -196,4 +272,16 @@ function getIngredientById(targetId) {
     }
   }
   return null; // return as non existent if ing not found
+}
+
+function loadIngredients() {
+  // Preload all ingredient images
+  for (let categoryKey in INGREDIENTS) {
+    let ingredientItems = INGREDIENTS[categoryKey];
+
+    for (let i = 0; i < ingredientItems.length; i++) { // goes through each ingredient in category
+      let item = ingredientItems[i];
+      ingredientAssets[item.id] = loadImage(item.img); //store the ingredient's image
+    }
+  }
 }
