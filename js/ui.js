@@ -83,38 +83,21 @@ class IngredientUI {
     return getCategoryItemsByDay(categoryKey, currentDay, day.unlockedIngredients);
   }
 
-  update(currentDay, burger) {
+  update(mx, my, currentDay, burger) {
     // handles clicks on arrows and slots
-
-    let mouseDown = mouseIsPressed;
-    // prevents multiple clicks from being registered
-    let clicked = mouseDown && !this.prevMouseDown;
-    this.prevMouseDown = mouseDown;
-    if (!clicked) return;
 
     //———————— ARROW CLICKS ————————
     // MOVE BACK
-    if (this.pointInHitbox(mouseX, mouseY, this.leftArrowHitbox)) {
+    if (this.pointInHitbox(mx, my, this.leftArrowHitbox)) {
       this.categoryIndex--;
       if (this.categoryIndex < 0) this.categoryIndex = this.categories.length - 1;
-
-      //Move back again if category is empty
-      while (getCategoryItemsByDay(this.getCategoryKey(), currentDay, day.unlockedIngredients).length === 0) {
-        this.categoryIndex--;
-        if (this.categoryIndex < 0) this.categoryIndex = this.categories.length - 1;
-      }
       return;
     }
 
     // MOVE FORWARD
-    if (this.pointInHitbox(mouseX, mouseY, this.rightArrowHitbox)) {
+    if (this.pointInHitbox(mx, my, this.rightArrowHitbox)) {
       this.categoryIndex++;
       if (this.categoryIndex >= this.categories.length) this.categoryIndex = 0;
-
-      while (getCategoryItemsByDay(this.getCategoryKey(), currentDay, day.unlockedIngredients).length === 0) {
-        this.categoryIndex++;
-        if (this.categoryIndex >= this.categories.length) this.categoryIndex = 0;
-      }
       return;
     }
 
@@ -125,7 +108,7 @@ class IngredientUI {
       if (i >= availableIngredients.length) break; //skip if no ingredient for slot
       let slotRect = this.slotRects[i];
 
-      if (this.pointInHitbox(mouseX, mouseY, slotRect)) {
+      if (this.pointInHitbox(mx, my, slotRect)) {
         let chosenIngredient = availableIngredients[i];
 
         // Check if the player owns this ingredient

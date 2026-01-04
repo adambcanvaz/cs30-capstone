@@ -838,8 +838,8 @@ const CHARACTERS = {
     id: "elf_king", name: "Patriarch", unlockDay: 7, mandatory: true,
     animData: {
       idle: { file: "assets/characters/elf_king/idle.png", frames: 7, loop: true },
-      success: { file: "assets/characters/dialogue/jump.png", frames: 7, loop: false },
-      fail: { file: "assets/characters/elf_king/attack.png", frames: 5, loop: false }
+      success: { file: "assets/characters/elf_king/dialogue.png", frames: 7, loop: false },
+      fail: { file: "assets/characters/elf_king/protection.png", frames: 5, loop: false }
     },
     dialogue: [{
       order: "It has bestowed on me that a rival kingdom had praised your food dungeon. I desire the 'Midnight Feast'. Wagyu meat, dark mushrooms, spicy wasabi, rings of Tanzanite, and the egg of a flightless bird. Bless thee most royal sauce too.",
@@ -862,13 +862,13 @@ function loadCharacters() {
   }
 }
 
-function getRandomCustomer(currentDay) {
+function getRandomCustomer(currentDay, isTimeUp) {
   // chooses customer randomly from available list
   
   //stores ALL customers allowed for this day
   let potentialCustomers = [];
   for (let key in CHARACTERS) {
-    if (CHARACTERS[key].unlockDay <= currentDay) {
+    if (CHARACTERS[key].unlockDay === currentDay) {
       potentialCustomers.push(CHARACTERS[key]);
     }
   }
@@ -877,7 +877,7 @@ function getRandomCustomer(currentDay) {
   let availableCustomers = [];
   for(let i = 0; i < potentialCustomers.length; i++){
     let customer = potentialCustomers[i];
-    if(day.servedCustomers.includes(customer.id)) availableCustomers.push(customer);
+    if(!day.servedCustomers.includes(customer.id)) availableCustomers.push(customer);
   }
 
   //handles the overtime logic; if the day is up, it filters if any mandatory customers are left
@@ -895,11 +895,88 @@ function getRandomCustomer(currentDay) {
   // random customer system
   let randomCustomer = floor(random()*availableCustomers.length)
   let chosenCustomer = availableCustomers[randomCustomer];
-  let dialogue = chosenCustomer.dialogue; // extracts the dialogue for said customer
+  let dialogue = chosenCustomer.dialogue[0]; // extracts the dialogue for said customer
   day.servedCustomers.push(chosenCustomer.id); // marks them as already served
 
   return{
     character: chosenCustomer,
     order: dialogue
+  };
+}
+
+class Character{
+  constructor(data){
+    this.data = data; // character object properties
+    
+    // Animation states
+    this.x = width*0.3
+    this.y = height+300; //off-screen
+    this.targetY = (height/2)-150;
+    this.state = "entering"; // entering, idle, success/fail, leaving
+
+    // Sprite settings
+    this.currentAnimation = "idle";
+    this.frameIndex = 0;
+    this.frameTimer = 0;
+  }
+
+  update(){
+    // Slide up animation
+    if(this.state === "entering"){
+      this.y = lerp(this.y, this.targetY, 0.15); // smooth animation
+      // changes state to idle while sliding up
+      if(abs(this.y-this.targetY) < 1){
+        this.y = this.targetY;
+        this.state = "idle";
+      }
+    }
+
+    // Slide down animation
+    else if(this.state === "leaving"){
+      this.y = lerp(this.y, height+400, 0.15); // smooth animation
+    }
+
+    // Idle frames
+    this.frameTimer++;
+    if(this.frameTimer > 5){ // value controls how fast the animation is (lower = faster)
+      this.frameTimer = 0;
+      this.frameIndex++;
+
+      // resets loop
+      let animationData = this.data.animData[this.currentAnimation];
+      if(this.frameIndex >= animationData.frames) this.frameIndex = 0;
+    }
+  }
+
+  display(){
+    // This function splits and displays customers
+
+    let assetKey = this.data.id + "_" + this.currentAnimation; //find the loaded image
+    let spriteSheet = characterAssets[assetKey];
+
+    if(spriteSheet){
+      let animationData = this.data.animData[this.currentAnimation];
+
+      //———————— 8 IMAGE PROPERTIES ————————
+      // coordinates on canvas
+      let destX = this.x;
+      let destY = this.y;
+      // image scaling on canvas
+      let destWidth = 500; 
+      let destHeight = 500;
+      // coordinates of original for each frame
+      let sourceX = this.frameIndex*(spriteSheet.width/animationData.frames);
+      let sourceY = 0;
+      // dimensions of original frames
+      let sourceWidth = spriteSheet.width/animationData.frames;
+      let sourceHeight = spriteSheet.height;
+
+      //Draws the character
+      image(spriteSheet, destX, destY, destWidth, destHeight, sourceX, sourceY, sourceWidth, sourceHeight);
+    }
+  }
+
+  leave(){
+    this.state = "leaving";
   }
 }

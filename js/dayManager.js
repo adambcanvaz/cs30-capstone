@@ -56,6 +56,15 @@ class Day {
     this.dailyTips = 0;
     this.dailyExpenses = 0;
     this.dailyRefunds = 0;
+    this.servedCustomers = [];
+
+    //———————— TIME SYSTEM ————————
+    this.startHour = 8; //8AM
+    this.endHour = 18; //6PM
+    this.totalShiftMinutes = (this.endHour-this.startHour)*60;
+    this.elapsedMinutes = 0;
+    this.isShiftActive = false;
+    this.realTargetMinutes = 6;
 
     //———————— UNLOCK SYSTEM ————————
     //***TEMPORARY FOR TESTING, REPLACE LATER WITH SHOP LOGIC***
@@ -86,12 +95,12 @@ class Day {
     this.dailyTips = 0;
     this.dailyExpenses = 0;
     this.dailyRefunds = 0;
+    this.servedCustomers = [];
   }
 
   nextDay() {
     if (this.currentDay < 7) {
       this.currentDay++;
-      this.dailyEarnings = 0; // Reset for the new shift
       return true;
     }
     return false; // Game done
@@ -117,7 +126,6 @@ class Day {
     this.totalCash += amount;
   }
 
-  
   logRefund(amount) {
     // Handling Refunds (used by order.js)
     this.dailyRefunds += amount;
@@ -127,5 +135,52 @@ class Day {
   logPoints(amount) {
     // Handling Burger Points (used by order.js)
     this.burgerPoints += amount;
+  }
+
+  //———————— SHIFT TIME LOGIC ————————
+
+  startShift(){
+    this.isShiftActive = true;
+    this.elapsedMinutes = 0;
+    this.resetDailyTrackers();
+  }
+
+  endShift(){
+    this.isShiftActive = false;
+  }
+
+  startTime(){
+    let realSeconds = this.realTargetMinutes*60;
+    let increment = this.totalShiftMinutes/(realSeconds*60);
+
+    this.updateTime(increment);
+  }
+
+  updateTime(amount){
+    if(!this.isShiftActive) return;
+    this.elapsedMinutes += amount;
+    if(this.elapsedMinutes > this.totalShiftMinutes) this.elapsedMinutes = this.totalShiftMinutes;
+  }
+
+  getClockFormat(){
+    // converts time into 00:00AM/PM format
+    let totalMinutes = (this.startHour*60)+this.elapsedMinutes;
+    let hours = floor(totalMinutes/60);
+    let minutes = floor(totalMinutes % 60);
+    let amPM;
+    
+    if(hours >= 12) amPM = "PM";
+    else if(hours < 12) amPM = "AM";
+
+    // from 24hr format to 12
+    let displayHours = hours%12;
+    if(displayHours === 0) displayHours = 12;
+    
+    // for minutes from 1 to 9 (put 0 in front)
+    let displayMinutes;
+    if(minutes < 10) displayMinutes = "0" + minutes;
+    else if(minutes >= 10) displayMinutes = minutes;
+
+    return displayHours + ":" + displayMinutes + " " + amPM;
   }
 }

@@ -8,7 +8,7 @@ class Burger {
   addIngredient(ingredientId) {
     // Function adds ingredient to stack.
 
-    //———————— RULES/LIMITATIONS ————————
+    /*//———————— RULES/LIMITATIONS ————————
     // First item must be bottom bun
     if (this.burgerStack.length === 0) {
       if (ingredientId !== "bun_bottom") return false;
@@ -18,7 +18,7 @@ class Burger {
     let lastIndex = this.burgerStack.length - 1;
     if (this.burgerStack.length > 0 && this.burgerStack[lastIndex] === "bun_top") {
       return false;
-    }
+    }*/
 
     // Adds to stack if conditions met
     this.burgerStack.push(ingredientId);

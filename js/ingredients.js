@@ -127,7 +127,7 @@ const INGREDIENTS = {
     {
       id: "bell_peppers",
       img: "assets/food/veggies/bell_peppers.png",
-      unlockDay: 7,
+      unlockDay: 6,
       type: "veggie",
       cost: 0.81, // for 3 slices
       scale: 0.90,

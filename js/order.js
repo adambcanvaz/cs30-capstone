@@ -3,9 +3,12 @@
 class Order {
   constructor(currentDay, unlockedIngredients) {
     this.targetStack = [];
-    this.generateRandomOrder(currentDay, unlockedIngredients);
+    this.character = null;
+    this.dialogueText = "";
+    //this.generateRandomOrder(currentDay, unlockedIngredients);
   }
 
+  //* Not used for now, but I'll keep it just in case
   generateRandomOrder(day, unlockedIngredients) {
     // Generate a burger order based on category limits
     this.targetStack = [];
@@ -57,12 +60,14 @@ class Order {
     this.targetStack.push("bun_top"); //always end with top bun last
   }
 
+  //*
   pickOneItem(sourceList) {
     //helper to randomly pick a single item
     let item = floor(random(0, sourceList.length));
     return sourceList[item];
   }
 
+  //*
   pickMultipleItems(sourceList, amountNeeded) {
     //helper to randomly pick multiple items (without same item more than once)
     let chosenIngredients = [];
