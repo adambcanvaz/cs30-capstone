@@ -6,6 +6,7 @@ function loadScene() {
   bgImg = loadImage("assets/scene/tile_background.png");
   counter = loadImage("assets/scene/counter.png");
   woodenBoard = loadImage("assets/scene/board.png");
+  restaurantCounter = loadImage("assets/scene/restaurant_counter.png");
 }
 
 class SceneManager{
@@ -59,7 +60,6 @@ class SceneManager{
   //———————— STATE LOGIC ————————
 
   startDay(){
-    day.resetDailyTrackers();
     day.startShift();
     this.nextCustomer();
   }
@@ -96,7 +96,7 @@ class SceneManager{
 
   drawRestaurant(){
     // Background
-    if(bgImg) image(bgImg, width/2, height/2, width, height);
+    background("white");
 
     // Character
     if(this.activeCharacter){
@@ -105,7 +105,7 @@ class SceneManager{
     }
 
     // Foreground
-    if(counter) image(counter, width/2, height, width, height);
+    if(restaurantCounter) image(restaurantCounter, width/2, height*0.80, restaurantCounter.width*0.5, restaurantCounter.height*0.5);
 
     // HUD
     day.startTime();
@@ -113,7 +113,11 @@ class SceneManager{
   }
 
   drawKitchen(){
-    background("white");
+    // Background
+    if(bgImg) image(bgImg, width/2, height/2, width, height);
+
+    // Foreground
+    if(counter) image(counter, width/2, height, width, height);
     if (woodenBoard) image(woodenBoard, width/2, (height/2)+145, width*0.3, height*0.3);
 
     // draw burger & ui

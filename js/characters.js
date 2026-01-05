@@ -114,7 +114,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "Dispatch, I need a 10-4 on a classic patrol vehicle. Put a siren on top.",
       hint: "Focus, citizen. A 'Siren' is a tomato. Beef, Cheese, Tomato.",
-      stack: ["bun_bottom", "beef", "american_slice", "tomato", "bun_top"],
+      stack: ["bun_bottom", "beef", "american_cheese", "tomato", "bun_top"],
       success: "Copy that. Good work, citizen.",
       fail: "Citation issued for culinary incompetence."
     }]
@@ -130,7 +130,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "I've been on my feet for 12 hours. One of my patient's had swallowed a spatula... Don't ask. I need comfort food. Just cheese. Lots of it. And crunch.",
       hint: "Honey, just give me a cheeseburger with extra cheese. Don't forget that green layer. I'm exhausted.",
-      stack: ["bun_bottom", "beef", "american_slice", "american_slice", "lettuce", "bun_top"],
+      stack: ["bun_bottom", "beef", "american_cheese", "american_cheese", "lettuce", "bun_top"],
       success: "You're a lifesaver, hon.",
       fail: "I'm too tired for this, it's wrong. Maybe I should make you eat that spatula."
     }]
@@ -146,7 +146,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "Hey boss. I got a long shift. Give me a double cheeseburger with everything. Lettuce, tomato, ketchup, mustard. Load it up.",
       hint: "The works, boss! Beef, cheese, lettuce, tomato, ketchup, mustard. Everything!",
-      stack: ["bun_bottom", "beef", "american_slice", "beef", "american_slice", "lettuce", "tomato", "ketchup", "mustard", "bun_top"],
+      stack: ["bun_bottom", "beef", "american_cheese", "beef", "american_cheese", "lettuce", "tomato", "ketchup", "mustard", "bun_top"],
       success: "Now that's a lunch.",
       fail: "You forgot something, boss. Tsk tsk."
     }]
@@ -162,7 +162,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "Is this the famous 'Traffic Light' burger? *hiccup* Red, Yellow, Green?",
       hint: "You know! Red tomato, yellow cheese, green lettuce. For the 'gram!",
-      stack: ["bun_bottom", "beef", "lettuce", "tomato", "american_slice", "ketchup", "mustard", "bun_top"],
+      stack: ["bun_bottom", "beef", "lettuce", "tomato", "american_cheese", "ketchup", "mustard", "bun_top"],
       success: "Wow! Going straight to all my 27 Instagram followers! *hiccup*",
       fail: "This doesn't look like the ads... *hiccup* My Instagram will be hearing about this. Cancelled."
     }]
@@ -178,7 +178,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "Can I have a cheeseburger? But with no yellow sauce? My daddy says mustard is spicy.",
       hint: "No mustard! Just ketchup and cheese please!",
-      stack: ["bun_bottom", "beef", "american_slice", "ketchup", "bun_top"],
+      stack: ["bun_bottom", "beef", "american_cheese", "ketchup", "bun_top"],
       success: "Yummy!",
       fail: "Ew! Spicy! Daddy will ruin your place to the ground."
     }]
@@ -194,7 +194,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "Rations. Meat. Bread. Cheese. Execute.",
       hint: "Clarification: Standard Cheeseburger. Beef. Cheese. Bun. Execute.",
-      stack: ["bun_bottom", "beef", "american_slice", "bun_top"],
+      stack: ["bun_bottom", "beef", "american_cheese", "bun_top"],
       success: "Affirmative. Spared.",
       fail: "Incorrect. Attack."
     }]
@@ -310,7 +310,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "The drones! Bury the drones in the dirt! ...but you gotta insulate it in foil and glue!",
       hint: "The flying drone! Hide it with fungi, lettuce and cheese! Hurry!",
-      stack: ["bun_bottom", "chicken", "american_slice", "mushrooms", "lettuce", "bun_top"],
+      stack: ["bun_bottom", "chicken", "american_cheese", "mushrooms", "lettuce", "bun_top"],
       success: "Eat it quickly! The signal is fading!",
       fail: "THEY FOUND ME!"
     }]
@@ -406,7 +406,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "Hey again. My wife has me on a diet. One of them healthy burgers. But... sneak a slice of freedom on it? She won't know.",
       hint: "Shh! Veggie burger. Cheapest cheese on it. Don't tell my wife.",
-      stack: ["bun_bottom", "veggie_patty", "american_slice", "bun_top"],
+      stack: ["bun_bottom", "veggie_patty", "american_cheese", "bun_top"],
       success: "Our little secret.",
       fail: "Is this meat? If she finds out I'm dead."
     }]
@@ -440,7 +440,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "Swine and expensive cheese... but I'm not a savage. It needs to be plated properly. A bed of greens and a slice of heirloom fruit.",
       hint: "I want bacon and cheddar. Lettuce and tomato from the organic market. No cheap cow.",
-      stack: ["bun_bottom", "bacon", "cheddar_slice", "lettuce", "tomato", "bun_top"],
+      stack: ["bun_bottom", "bacon", "cheddar_cheese", "lettuce", "tomato", "bun_top"],
       success: "Keep the change.",
       fail: "Gross. Peasant food. Blegh."
     }]
@@ -520,7 +520,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "I require the King's Stack. Meat, Cheese, Meat, Cheese, crowned with Bacon!",
       hint: "Double Cheeseburger with Bacon, knave!",
-      stack: ["bun_bottom", "beef", "american_slice", "beef", "american_slice", "bacon", "bun_top"],
+      stack: ["bun_bottom", "beef", "american_cheese", "beef", "american_cheese", "bacon", "bun_top"],
       success: "Huzzah!",
       fail: "My defenses are lowered!"
     }]
@@ -536,7 +536,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "We demand a feast fit for royalty! A Crown of Gold upon the Swine! Make it double! One green king bed.",
       hint: "Double cheese and bacon on the beef! Peasant's 'lettuce'. Make haste!",
-      stack: ["bun_bottom", "beef", "cheddar_slice", "beef", "cheddar_slice", "lettuce", "bacon", "bun_top"],
+      stack: ["bun_bottom", "beef", "cheddar_cheese", "beef", "cheddar_cheese", "lettuce", "bacon", "bun_top"],
       success: "We dub thee... Sir Burger Maker.",
       fail: "Off with his head! This is peasant food!"
     }]
@@ -602,7 +602,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "I want a beige burger. No strong colors. A4-paper-white with some ink.",
       hint: "Swiss cheese and mayo on Beef. Mushrooms.",
-      stack: ["bun_bottom", "beef", "swiss_slice", "mushrooms", "mayo", "bun_top"],
+      stack: ["bun_bottom", "beef", "swiss_cheese", "mushrooms", "mayo", "bun_top"],
       success: "Balanced.",
       fail: "Too colorful."
     }]
@@ -618,7 +618,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "Fuel my flame! I need the peppers... but I need grease to keep the fire burning. And the melting yellow sludge.",
       hint: "Chili peppers and Jalapenos on Beef! Add the bacon and american cheese.",
-      stack: ["bun_bottom", "beef", "american_slice", "bacon", "chili", "jalapeno", "bun_top"],
+      stack: ["bun_bottom", "beef", "american_cheese", "bacon", "chili", "jalapeno", "bun_top"],
       success: "The fire rises!",
       fail: "Extinguished."
     }]
@@ -634,7 +634,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "The green poison... but it needs the darkness of the forest and the pale moon. Some sweet colourfulness doesn't hurt too.",
       hint: "Wasabi. The green paste. Put it on the beef with some fungi and swiss. Bell peppers.",
-      stack: ["bun_bottom", "beef", "swiss_slice", "mushrooms", "bell_peppers", "wasabi", "bun_top"],
+      stack: ["bun_bottom", "beef", "swiss_cheese", "mushrooms", "bell_peppers", "wasabi", "bun_top"],
       success: "It stings... excellent.",
       fail: "Boring."
     }]
@@ -666,7 +666,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "No stomach. Just give me the calcium.",
       hint: "Swiss Cheese. It has holes, like me. Just cheese.",
-      stack: ["swiss_slice", "swiss_slice"],
+      stack: ["swiss_cheese", "swiss_cheese"],
       success: "Rattle rattle!",
       fail: "It fell through my ribs..."
     }]
@@ -714,7 +714,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "I require a meal of elegance. White cheese for purity. Red fruit for passion. Resting on a bed of poultry. Slices full of life, yet dead.",
       hint: "Chicken, Swiss, and Tomato. Sweet peppers. Do try to keep up, my chef is more competent.",
-      stack: ["bun_bottom", "chicken", "swiss_slice", "tomato", "bell_peppers", "bun_top"],
+      stack: ["bun_bottom", "chicken", "swiss_cheese", "tomato", "bell_peppers", "bun_top"],
       success: "Exquisite.",
       fail: "Common muck. Take it away."
     }]
@@ -764,7 +764,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "We demand the 'Morning Raid'. Meats. Baby chicken. Patriotic Cheese. Sour slices. Mix red with brown. Execute.",
       hint: "Cannot acknowledge? Cow, pigs, egg, yellow cheese, pickles, BBQ.",
-      stack: ["bun_bottom", "beef", "american_slice", "pickles", "fried_egg", "BBQ_sauce", "Ketchup", "bun_top"],
+      stack: ["bun_bottom", "beef", "american_cheese", "pickles", "fried_egg", "BBQ_sauce", "Ketchup", "bun_top"],
       success: "Mission accomplished.",
       fail: "You forgot the ammo!"
     }]
@@ -780,7 +780,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "A classic burger without the burger.",
       hint: "Just the toppings! Lettuce, Tomato, Cheddar. No bun!",
-      stack: ["lettuce", "tomato", "american_slice"],
+      stack: ["lettuce", "tomato", "american_cheese"],
       success: "Almost real...",
       fail: "Too heavy!"
     }]
@@ -796,7 +796,7 @@ const CHARACTERS = {
     dialogue: [{
       order: "Meat tube pizza... triple cheese...",
       hint: "Three cheeses... Pepperoni... Sauce... ARGH!",
-      stack: ["bun_bottom", "american_slice", "cheddar_slice", "swiss_slice", "sausage", "ketchup", "bun_top"],
+      stack: ["bun_bottom", "american_cheese", "cheddar_cheese", "swiss_cheese", "sausage", "ketchup", "bun_top"],
       success: "*Joyful gurgle*",
       fail: "*Rage scream*"
     }]
@@ -909,7 +909,7 @@ class Character{
     this.data = data; // character object properties
     
     // Animation states
-    this.x = width*0.3
+    this.x = width*0.20
     this.y = height+300; //off-screen
     this.targetY = (height/2)-150;
     this.state = "entering"; // entering, idle, success/fail, leaving

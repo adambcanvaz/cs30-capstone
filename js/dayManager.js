@@ -45,6 +45,41 @@ const DAYS = {
   }
 };
 
+const SHOP_ITEMS = [
+
+  //———————— DAY 2 ————————
+  { id: "american_cheese", name: "American Cheese", price: 30, unlockDay: 2 },
+  { id: "tomato", name: "Fresh Tomato", price: 25, unlockDay: 2 },
+  { id: "mustard", name: "Mustard", price: 20, unlockDay: 2 },
+
+  //———————— DAY 3 ————————
+  { id: "chicken", name: "Butterfly Chicken", price: 50, unlockDay: 3 },
+  { id: "pickles", name: "Pickles", price: 30, unlockDay: 3 },
+  { id: "mayo", name: "Mayonnaise", price: 25, unlockDay: 3 },
+
+  //———————— DAY 4 ————————
+  { id: "veggie_patty", name: "Veggie Patty", price: 55, unlockDay: 4 },
+  { id: "mushrooms", name: "Mushrooms", price: 40, unlockDay: 4 },
+  { id: "red_onion", name: "Red Onion", price: 35, unlockDay: 4 },
+
+  //———————— DAY 5 ————————
+  { id: "bacon", name: "Crispy Bacon", price: 65, unlockDay: 5 },
+  { id: "cheddar_cheese", name: "Cheddar Cheese", price: 50, unlockDay: 5 },
+  { id: "bbq", name: "BBQ", price: 40, unlockDay: 5 },
+
+  //———————— DAY 6 ————————
+  { id: "jalapeno", name: "Jalapenos", price: 45, unlockDay: 6 },
+  { id: "chili", name: "Chili Peppers", price: 45, unlockDay: 6 },
+  { id: "swiss_cheese", name: "Swiss Cheese", price: 50, unlockDay: 6 },
+  { id: "wasabi", name: "Wasabi", price: 60, unlockDay: 6 },
+
+  //———————— DAY 7 ————————
+  { id: "fried_egg", name: "Fried Egg", price: 80, unlockDay: 7 },
+  { id: "sausage", name: "Sausage", price: 70, unlockDay: 7 },
+  { id: "fried_onion", name: "Fried Onions", price: 60, unlockDay: 7 },
+  { id: "restaurant_sauce", name: "Restaurant Sauce", price: 90, unlockDay: 7 }
+];
+
 class Day {
   constructor() {
     this.currentDay = 1;
@@ -57,6 +92,7 @@ class Day {
     this.dailyExpenses = 0;
     this.dailyRefunds = 0;
     this.servedCustomers = [];
+    this.dailyReport = [];
 
     //———————— TIME SYSTEM ————————
     this.startHour = 8; //8AM
@@ -64,11 +100,10 @@ class Day {
     this.totalShiftMinutes = (this.endHour-this.startHour)*60;
     this.elapsedMinutes = 0;
     this.isShiftActive = false;
-    this.realTargetMinutes = 6;
+    this.realShiftMinutes = 6;
 
     //———————— UNLOCK SYSTEM ————————
-    //***TEMPORARY FOR TESTING, REPLACE LATER WITH SHOP LOGIC***
-    this.unlockedIngredients = ["bun_bottom", "bun_top", "beef", "lettuce", "ketchup"];
+    this.unlockedIngredients = ["bun_bottom", "bun_top", "beef", "lettuce", "ketchup"]; // day 1
   }
 
   getConfig() {
@@ -88,6 +123,20 @@ class Day {
     if (this.burgerPoints >= this.getConfig().pointsGoal) {
       return true;
     }
+  }
+
+  generateDailyReport(){
+    // generates end-of-day summary BEFORE resetting
+    let config = this.getConfig();
+
+    return this.dailyReport = {
+      sales: this.dailySales,
+      supplies: this.dailyExpenses,
+      tips: this.dailyTips,
+      refunds: this.dailyRefunds,
+      utilities: config.utilities,
+      total: this.getDailyNet()
+    };
   }
 
   resetDailyTrackers() {
@@ -146,11 +195,12 @@ class Day {
   }
 
   endShift(){
+    this.generateDailyReport();
     this.isShiftActive = false;
   }
 
   startTime(){
-    let realSeconds = this.realTargetMinutes*60;
+    let realSeconds = this.realShiftMinutes*60;
     let increment = this.totalShiftMinutes/(realSeconds*60);
 
     this.updateTime(increment);
@@ -182,5 +232,32 @@ class Day {
     else if(minutes >= 10) displayMinutes = minutes;
 
     return displayHours + ":" + displayMinutes + " " + amPM;
+  }
+
+  //———————— SHOP LOGIC ————————
+
+  buyItem(itemId){
+    // purchase ingredient from end-of-day shop
+    
+    // Finding the item in the list
+    let item;
+    for(let i = 0; i < SHOP_ITEMS.length; i++){
+      if(SHOP_ITEMS[i].id === itemId){
+        item = SHOP_ITEMS[i];
+        break; // Exit once found
+      }
+    }
+
+    // Check if enough money
+    if(this.totalCash >= item.price){
+      this.totalCash -= item.price;
+      this.unlockedIngredients.push(item.id);
+      return true;
+    }
+    return false;
+  }
+
+  isUnlocked(itemId){
+    return this.unlockedIngredients.includes(itemId);
   }
 }
