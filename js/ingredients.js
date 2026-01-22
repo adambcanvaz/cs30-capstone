@@ -1,6 +1,7 @@
 //—— INGREDIENTS SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
+// Database of all food items, defining their costs, visual assets, and specific unlock requirements.
 
-let ingredientAssets = {};
+let ingredientAssets = {}; 
 
 const INGREDIENTS = {
   buns: [
@@ -235,6 +236,7 @@ function getAvailableIngredients(currentDay) {
 
   for (let categoryKey in INGREDIENTS) {
     let ingredientsList = INGREDIENTS[categoryKey];
+    
     for (let i = 0; i < ingredientsList.length; i++) {
       let ingredientItem = ingredientsList[i];
       if (ingredientItem.unlockDay <= currentDay) { // checks if item is available
@@ -253,6 +255,7 @@ function getCategoryItemsByDay(categoryKey, currentDay, unlockedIngredients) {
 
   for (let i = 0; i < categoryArray.length; i++) {
     let item = categoryArray[i];
+    
     if (item.unlockDay <= currentDay && unlockedIngredients && unlockedIngredients.includes(item.id)) {
       filteredIngredients.push(item);
     }
@@ -264,14 +267,15 @@ function getIngredientById(targetId) {
   // find and return the ingredient by its ID
   for (let categoryKey in INGREDIENTS) {
     let ingredientsList = INGREDIENTS[categoryKey];
-    for (let i = 0; i < ingredientsList.length; i++) { //loop thru every ing
+    
+    for (let i = 0; i < ingredientsList.length; i++) { 
       let ingredientItem = ingredientsList[i];
       if (ingredientItem.id === targetId) { // checks and returns if satisfeid
         return ingredientItem;
       }
     }
   }
-  return null; // return as non existent if ing not found
+  return null; 
 }
 
 function loadIngredients() {

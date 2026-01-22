@@ -1,84 +1,79 @@
 //—— DAY MANAGER ——————————————————————————————————————————————————————————————————————————————————————
+// Manages the core game data including time tracking, 
+// financial calculations, daily progression, and the Save/Load system.
 
 const DAYS = {
-  1: {
-    pointsGoal: 0, //tbd
-    markupRate: 1.2,
-    serviceFee: 1.00,
-    utilities: 0.00,
-  },
-  2: {
-    pointsGoal: 0,
-    markupRate: 1.3,
-    serviceFee: 2.50,
-    utilities: 5.00,
-  },
-  3: {
-    pointsGoal: 0,
-    markupRate: 1.4,
-    serviceFee: 2.50,
-    utilities: 10.00,
-  },
-  4: {
-    pointsGoal: 0,
-    markupRate: 1.5,
+  1: { 
+    pointsGoal: 100,
+    markupRate: 2.2,
     serviceFee: 3.00,
-    utilities: 10.00,
-  },
-  5: {
-    pointsGoal: 0,
-    markupRate: 1.6,
-    serviceFee: 4.25,
     utilities: 15.00,
   },
-  6: {
-    pointsGoal: 0,
-    markupRate: 1.8,
-    serviceFee: 5.75,
+  2: { 
+    pointsGoal: 150, 
+    markupRate: 2.4, 
+    serviceFee: 4.00, 
     utilities: 20.00,
   },
-  7: {
-    pointsGoal: 0,
-    markupRate: 2.0,
-    serviceFee: 9.00,
-    utilities: 20.00,
+  3: { 
+    pointsGoal: 250, 
+    markupRate: 2.6, 
+    serviceFee: 5.00, 
+    utilities: 30.00, 
+  },
+  4: { 
+    pointsGoal: 375, 
+    markupRate: 2.8, 
+    serviceFee: 6.00, 
+    utilities: 40.00, 
+  },
+  5: { 
+    pointsGoal: 500, 
+    markupRate: 3.0, 
+    serviceFee: 7.00, 
+    utilities: 50.00, 
+  },
+  6: { 
+    pointsGoal: 650, 
+    markupRate: 3.3, 
+    serviceFee: 8.50, 
+    utilities: 60.00, 
+  },
+  7: { 
+    pointsGoal: 800, 
+    markupRate: 3.6, 
+    serviceFee: 10.00, 
+    utilities: 80.00, 
   }
 };
 
-const SHOP_ITEMS = [
+// ——— SAVE SYSTEM CONSTANT ———
+const SAVE_KEY = "game_save";
 
-  //———————— DAY 2 ————————
-  { id: "american_cheese", name: "American Cheese", price: 30, unlockDay: 2 },
-  { id: "tomato", name: "Fresh Tomato", price: 25, unlockDay: 2 },
-  { id: "mustard", name: "Mustard", price: 20, unlockDay: 2 },
+function saveGame() {
+  let data = day.exportData();
+  storeItem(SAVE_KEY, data);
+  console.log("Game Saved!");
+}
 
-  //———————— DAY 3 ————————
-  { id: "chicken", name: "Butterfly Chicken", price: 50, unlockDay: 3 },
-  { id: "pickles", name: "Pickles", price: 30, unlockDay: 3 },
-  { id: "mayo", name: "Mayonnaise", price: 25, unlockDay: 3 },
+function loadGame() {
+  let data = getItem(SAVE_KEY);
+  
+  if (data) {
+    day.importData(data);
+    return true; 
+  }
+  return false;
+}
 
-  //———————— DAY 4 ————————
-  { id: "veggie_patty", name: "Veggie Patty", price: 55, unlockDay: 4 },
-  { id: "mushrooms", name: "Mushrooms", price: 40, unlockDay: 4 },
-  { id: "red_onion", name: "Red Onion", price: 35, unlockDay: 4 },
+function hasSaveFile() {
+  return getItem(SAVE_KEY) !== null;
+}
 
-  //———————— DAY 5 ————————
-  { id: "bacon", name: "Crispy Bacon", price: 65, unlockDay: 5 },
-  { id: "cheddar_cheese", name: "Cheddar Cheese", price: 50, unlockDay: 5 },
-  { id: "bbq", name: "BBQ", price: 40, unlockDay: 5 },
-
-  //———————— DAY 6 ————————
-  { id: "jalapeno", name: "Jalapenos", price: 45, unlockDay: 6 },
-  { id: "chili", name: "Chili Peppers", price: 45, unlockDay: 6 },
-  { id: "swiss_cheese", name: "Swiss Cheese", price: 50, unlockDay: 6 },
-  { id: "wasabi", name: "Wasabi", price: 60, unlockDay: 6 },
-
-  //———————— DAY 7 ————————
-  { id: "fried_egg", name: "Fried Egg", price: 80, unlockDay: 7 },
-  { id: "sausage", name: "Sausage", price: 70, unlockDay: 7 },
-  { id: "fried_onion", name: "Fried Onions", price: 60, unlockDay: 7 },
-  { id: "restaurant_sauce", name: "Restaurant Sauce", price: 90, unlockDay: 7 }
-];
+function clearSave() {
+  removeItem(SAVE_KEY);
+  console.log("Save Cleared!");
+}
 
 class Day {
   constructor() {
@@ -86,24 +81,23 @@ class Day {
     this.totalCash = 100; // starting cash
     this.burgerPoints = 0;
 
+    // SNAPSHOT VARIABLES (For Retry Logic)
+    this.startOfDayCash = 100;
+    this.startOfDayPoints = 0;
+
     //———————— DAILY TRACKING ————————
-    this.dailySales = 0;
-    this.dailyTips = 0;
-    this.dailyExpenses = 0;
-    this.dailyRefunds = 0;
-    this.servedCustomers = [];
-    this.dailyReport = [];
+    this.resetDailyTrackers();
 
     //———————— TIME SYSTEM ————————
-    this.startHour = 8; //8AM
-    this.endHour = 18; //6PM
-    this.totalShiftMinutes = (this.endHour-this.startHour)*60;
+    this.startHour = 8; // 8 AM
+    this.endHour = 18;  // 6 PM
+    this.totalShiftMinutes = (this.endHour - this.startHour) * 60;
     this.elapsedMinutes = 0;
     this.isShiftActive = false;
-    this.realShiftMinutes = 6;
+    this.realShiftMinutes = 3; // How long a day lasts in real minutes
 
     //———————— UNLOCK SYSTEM ————————
-    this.unlockedIngredients = ["bun_bottom", "bun_top", "beef", "lettuce", "ketchup"]; // day 1
+    this.unlockedIngredients = ["bun_bottom", "bun_top", "beef", "lettuce", "ketchup"];  // day 1
   }
 
   getConfig() {
@@ -115,20 +109,13 @@ class Day {
   getDailyNet() {
     // Calculate net money
     let config = this.getConfig();
-    return (this.dailySales+this.dailyTips)-(this.dailyExpenses+this.dailyRefunds+config.utilities);
+    return (this.dailySales + this.dailyTips) - (this.dailyExpenses + this.dailyRefunds + config.utilities);
   }
 
-  isGoalReached() {
-    // Check if there is enough xp to pass
-    if (this.burgerPoints >= this.getConfig().pointsGoal) {
-      return true;
-    }
-  }
-
-  generateDailyReport(){
+  generateDailyReport() {
     // generates end-of-day summary BEFORE resetting
-    let config = this.getConfig();
 
+    let config = this.getConfig();
     return this.dailyReport = {
       sales: this.dailySales,
       supplies: this.dailyExpenses,
@@ -137,6 +124,11 @@ class Day {
       utilities: config.utilities,
       total: this.getDailyNet()
     };
+  }
+
+  isGoalReached() {
+    // Check if there is enough xp to pass
+    return this.burgerPoints >= this.getConfig().pointsGoal;
   }
 
   resetDailyTrackers() {
@@ -152,79 +144,64 @@ class Day {
       this.currentDay++;
       return true;
     }
-    return false; // Game done
+    return false;
   }
 
-  //———————— TRANSACTIONS LOGIC ————————
-
-  logExpense(amount) {
-    // Handling Expenses (used by ui.js)
-    this.dailyExpenses += amount;
-    this.totalCash -= amount;
+  revertToStartOfDay() {
+    // Restore the snapshot if player fails/retries
+    this.totalCash = this.startOfDayCash;
+    this.burgerPoints = this.startOfDayPoints;
+    
+    this.resetDailyTrackers();
   }
 
-  logSale(amount) {
-    // Handling Sales (used by order.js)
-    this.dailySales += amount;
-    this.totalCash += amount;
-  }
+  //———————— TRANSACTIONS ————————
 
-  logTip(amount) {
-    // Handling Tips (used by order.js)
-    this.dailyTips += amount;
-    this.totalCash += amount;
-  }
-
-  logRefund(amount) {
-    // Handling Refunds (used by order.js)
-    this.dailyRefunds += amount;
-    this.totalCash -= amount;
-  }
-
-  logPoints(amount) {
-    // Handling Burger Points (used by order.js)
-    this.burgerPoints += amount;
-  }
+  logExpense(amount) { this.dailyExpenses += amount; this.totalCash -= amount; }
+  logSale(amount)    { this.dailySales += amount;    this.totalCash += amount; }
+  logTip(amount)     { this.dailyTips += amount;     this.totalCash += amount; }
+  logRefund(amount)  { this.dailyRefunds += amount;  this.totalCash -= amount; }
+  logPoints(amount)  { this.burgerPoints += amount; }
 
   //———————— SHIFT TIME LOGIC ————————
 
-  startShift(){
+  startShift() {
     this.isShiftActive = true;
     this.elapsedMinutes = 0;
     this.resetDailyTrackers();
   }
 
-  endShift(){
+  endShift() {
     this.generateDailyReport();
     this.isShiftActive = false;
   }
 
-  startTime(){
-    let realSeconds = this.realShiftMinutes*60;
-    let increment = this.totalShiftMinutes/(realSeconds*60);
-
+  startTime() {
+    let realSeconds = this.realShiftMinutes * 60;
+    let increment = this.totalShiftMinutes / (realSeconds * 60);
     this.updateTime(increment);
   }
 
-  updateTime(amount){
-    if(!this.isShiftActive) return;
+  updateTime(amount) {
+    if (!this.isShiftActive) return;
     this.elapsedMinutes += amount;
-    if(this.elapsedMinutes > this.totalShiftMinutes) this.elapsedMinutes = this.totalShiftMinutes;
+    if (this.elapsedMinutes > this.totalShiftMinutes) this.elapsedMinutes = this.totalShiftMinutes;
   }
 
-  getClockFormat(){
+  getClockFormat() {
     // converts time into 00:00AM/PM format
-    let totalMinutes = (this.startHour*60)+this.elapsedMinutes;
-    let hours = floor(totalMinutes/60);
+
+    let totalMinutes = (this.startHour * 60) + this.elapsedMinutes;
+    let hours = floor(totalMinutes / 60);
     let minutes = floor(totalMinutes % 60);
+
     let amPM;
-    
     if(hours >= 12) amPM = "PM";
     else if(hours < 12) amPM = "AM";
 
-    // from 24hr format to 12
-    let displayHours = hours%12;
-    if(displayHours === 0) displayHours = 12;
+    let displayHours = hours % 12;
+    
+    if (displayHours === 0) displayHours = 12;
     
     // for minutes from 1 to 9 (put 0 in front)
     let displayMinutes;
@@ -234,30 +211,46 @@ class Day {
     return displayHours + ":" + displayMinutes + " " + amPM;
   }
 
-  //———————— SHOP LOGIC ————————
+  //———————— UPGRADE LOGIC ————————
 
-  buyItem(itemId){
-    // purchase ingredient from end-of-day shop
-    
-    // Finding the item in the list
-    let item;
-    for(let i = 0; i < SHOP_ITEMS.length; i++){
-      if(SHOP_ITEMS[i].id === itemId){
-        item = SHOP_ITEMS[i];
-        break; // Exit once found
-      }
+  getUpgradeMultiplier(type) {
+    if (type === "patience_decay") {
+      let multiplier = 1.0;
+      if (this.unlockedIngredients.includes("upgrade_patience_1")) multiplier *= 0.8;
+      if (this.unlockedIngredients.includes("upgrade_patience_2")) multiplier *= 0.8;
+      return multiplier;
     }
-
-    // Check if enough money
-    if(this.totalCash >= item.price){
-      this.totalCash -= item.price;
-      this.unlockedIngredients.push(item.id);
-      return true;
+    if (type === "tip_rate") {
+      let multiplier = 1.0;
+      if (this.unlockedIngredients.includes("upgrade_tips_1")) multiplier += 0.2;
+      return multiplier;
     }
-    return false;
+    return 1.0;
   }
 
-  isUnlocked(itemId){
-    return this.unlockedIngredients.includes(itemId);
+  //———————— SAVE SYSTEM ————————
+
+  exportData() {
+    return {
+      currentDay: this.currentDay,
+      totalCash: this.totalCash,
+      burgerPoints: this.burgerPoints,
+      unlockedIngredients: this.unlockedIngredients,
+      dailyReport: this.dailyReport
+    };
+  }
+
+  importData(data) {
+    if(!data) return;
+    this.currentDay = data.currentDay || 1;
+    this.totalCash = data.totalCash || 0;
+    this.burgerPoints = data.burgerPoints || 0;
+    this.unlockedIngredients = data.unlockedIngredients || ["bun_bottom", "bun_top", "beef", "lettuce", "ketchup"];
+    
+    // Reset trackers first
+    this.resetDailyTrackers();
+
+    // THEN load the report (so resetDailyTrackers doesn't override it)
+    this.dailyReport = data.dailyReport;
   }
 }

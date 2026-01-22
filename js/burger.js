@@ -1,4 +1,6 @@
 //—— BURGER SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
+// Manages the visual stack of ingredients currently 
+// being built by the player, including positioning and undo/clear logic.
 
 class Burger {
   constructor() {
@@ -6,21 +8,7 @@ class Burger {
   }
 
   addIngredient(ingredientId) {
-    // Function adds ingredient to stack.
-
-    /*//———————— RULES/LIMITATIONS ————————
-    // First item must be bottom bun
-    if (this.burgerStack.length === 0) {
-      if (ingredientId !== "bun_bottom") return false;
-    }
-
-    // Last item can only be top bun
-    let lastIndex = this.burgerStack.length - 1;
-    if (this.burgerStack.length > 0 && this.burgerStack[lastIndex] === "bun_top") {
-      return false;
-    }*/
-
-    // Adds to stack if conditions met
+    // Adds ingredient to stack
     this.burgerStack.push(ingredientId);
     return true;
   }
@@ -32,24 +20,25 @@ class Burger {
       let ingredientId = this.burgerStack[i];
       let ingredientImage = ingredientAssets[ingredientId];
 
-      //———————— STACKING AND POSITIONING logic ————————
-      //Get data for ingredient adjustment values
+      //———————— DATA & OFFSETS ————————
       let data = getIngredientById(ingredientId);
 
       //Apply offset adjustments (otherwise 0)
       if (!data.xOffset) adjustX = 0;
       else adjustX = data.xOffset;
+      
       if (!data.yOffset) adjustY = 0;
       else adjustY = data.yOffset;
+      
       if (!data.scale) adjustScale = 1;
       else adjustScale = data.scale;
 
-      //Stacking position
+      //———————— POSITIONING ————————
       let ingredientYOffset = -i * 12; // Adjusted for a tighter stack
       let finalX = centerX + adjustX;
       let finalY = baseY + ingredientYOffset + adjustY;
 
-      //———————— SCALING logic ————————
+      //———————— DRAWING ————————
       let targetWidth = 130 * adjustScale; // all ingredients scaled to this width (w/ adjustment)
       let scaleFactor = ingredientImage.height / ingredientImage.width;
       let finalHeight = targetWidth * scaleFactor;

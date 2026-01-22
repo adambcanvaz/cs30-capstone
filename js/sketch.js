@@ -1,4 +1,10 @@
+// Computer Science 30
+// Final Project (CAPSTONE): "Good Burger, Phenomenal Burger."
+// Teacher: Mr. Scott
+// Student: Adam Besbes
+
 //—— MAIN BACKBONE ——————————————————————————————————————————————————————————————————————————————————————
+// Handles asset preloading, canvas setup, and delegates the main draw loop to the Scene Manager.
 
 let day;
 let ui;
@@ -7,9 +13,11 @@ let currentOrder;
 let sceneManager;
 
 function preload() {
-  loadScene();
+  // Load all assets here
+  loadSceneAssets(); 
   loadIngredients();
   loadCharacters();
+  loadUIIcons();
 }
 
 function setup() {
@@ -17,18 +25,18 @@ function setup() {
   imageMode(CENTER);
   if (uiFont) textFont(uiFont);
 
-  sceneManager = new SceneManager();
+  // Initialize Core Systems
   day = new Day();
   burger = new Burger();
-  ui = new IngredientUI();
-  ui.layout();
+  ui = new IngredientUI(); 
+  sceneManager = new SceneManager();
+  
+  ui.layout(); 
 }
 
 function draw() {
   sceneManager.run();
 }
-
-//—— INPUT FUNCTIONS ——————————————————————————————————————————————————————————————————————————————————————
 
 function keyPressed() {
   sceneManager.handleInput(key);

@@ -1,14 +1,26 @@
 //—— ORDERING SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
+// Manages the logic for generating customer orders, 
+// calculating prices based on ingredients, and validating if the player's burger matches the request.
 
 class Order {
-  constructor(currentDay, unlockedIngredients) {
+  constructor() {
+    //———————— STATE ————————
     this.targetStack = [];
     this.character = null;
-    this.dialogueText = "";
-    //this.generateRandomOrder(currentDay, unlockedIngredients);
+    
+    //———————— DIALOGUE ————————
+    this.dialogueText = ""; 
+    this.dialogueHint = "";
+    this.successLine = "";
+    this.failLine = "";
+    
+    //———————— STATUS ————————
+    this.isClarified = false;
+    this.paidAmount = 0;
+    this.hasPenalty = false;
   }
 
-  //* Not used for now, but I'll keep it just in case
+  /* THIS WAS DISABLED AS NO MORE RANDOM ORDERS ARE NEEDED
   generateRandomOrder(day, unlockedIngredients) {
     // Generate a burger order based on category limits
     this.targetStack = [];
@@ -60,14 +72,12 @@ class Order {
     this.targetStack.push("bun_top"); //always end with top bun last
   }
 
-  //*
   pickOneItem(sourceList) {
     //helper to randomly pick a single item
     let item = floor(random(0, sourceList.length));
     return sourceList[item];
   }
 
-  //*
   pickMultipleItems(sourceList, amountNeeded) {
     //helper to randomly pick multiple items (without same item more than once)
     let chosenIngredients = [];
@@ -89,6 +99,22 @@ class Order {
       if (!alreadyChosen) chosenIngredients.push(targetItem);
     }
     return chosenIngredients;
+  } */
+
+  createFromData(orderData) {
+    // populates the order with specific customer data
+    this.targetStack = orderData.stack;
+    this.dialogueText = orderData.order;
+    this.dialogueHint = orderData.hint;
+    this.successLine = orderData.success;
+    this.failLine = orderData.fail;
+  }
+
+  clarify() {
+    // switches text to the hint and applies penalty
+    this.dialogueText = this.dialogueHint;
+    this.isClarified = true;
+    this.hasPenalty = true;
   }
 
   checkOrderMatch(builtStack) {
@@ -105,51 +131,23 @@ class Order {
         return false;
       }
     }
-
+    
     return true; //pass matching check
-  }
-
-  serveOrder() {
-    //serves order after order is matched
-    let isCorrect = currentOrder.checkOrderMatch(burger.burgerStack);
-    let config = day.getConfig();
-    let revenue = this.calculatePrice(config.markupRate, config.serviceFee);
-
-    if (isCorrect){
-      day.logSale(revenue); // Calculate food sales
-
-      // Calculate tips (random 5-10%)
-      let tipAmount = revenue*random(0.05, 0.10);
-      day.logTip(tipAmount);
-
-      // Burger XP points (standard rewarrd)
-      day.logPoints(20);
-    } 
-    else {
-      // Order is wrong
-      let customerIsAngry = random() > 0.3; // 30% chance
-      if (customerIsAngry) day.logRefund(revenue); // Refund
-      day.logPoints(10); //partial xp for effort
-    }
-
-    burger.clear();
-    currentOrder = new Order(day.currentDay, day.unlockedIngredients);
   }
 
   calculatePrice(priceMarkup, serviceFee) {
     //calculates target price of customer's order
     let baseCost = 0;
-
+    
     for (let i = 0; i < this.targetStack.length; i++) {
       let id = this.targetStack[i];
       let data = getIngredientById(id);
-
+      
       if (data && data.cost) {
         baseCost += data.cost;
       }
     }
-
-    let finalPrice = (baseCost * priceMarkup) + serviceFee;
-    return finalPrice;
+    
+    return (baseCost * priceMarkup) + serviceFee;
   }
 }

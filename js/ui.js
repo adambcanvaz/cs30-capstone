@@ -1,4 +1,6 @@
-//—— USER INTERFACE SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
+//—— KITCHEN UI ——————————————————————————————————————————————————————————————————————————————————————
+// Handles the ingredient selection panel in the kitchen scene,
+// including category navigation, ingredient slots, and input handling.
 
 class IngredientUI {
   constructor() {

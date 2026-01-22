@@ -1,4 +1,6 @@
 //—— CHARACTERS SYSTEM ——————————————————————————————————————————————————————————————————————————————————————
+// Contains all customer data (sprites/dialogue), 
+// and handles individual character logic like patience decay and reactions.
 
 let characterAssets = {};
 
@@ -852,9 +854,10 @@ const CHARACTERS = {
 };
 
 function loadCharacters() {
+  // preloads all character sprites
   for (let key in CHARACTERS) {
     let char = CHARACTERS[key];
-
+    
     // Loads assets, creates matching ids for spritesheets
     if (char.animData.idle) characterAssets[char.id + "_idle"] = loadImage(char.animData.idle.file);
     if (char.animData.success) characterAssets[char.id + "_success"] = loadImage(char.animData.success.file);
@@ -889,8 +892,7 @@ function getRandomCustomer(currentDay, isTimeUp) {
     availableCustomers = mandatoryOnly;
   }
 
-  //day ends if there are no customers left
-  if(availableCustomers.length === 0) return null;
+  if (availableCustomers.length === 0) return null;
 
   // random customer system
   let randomCustomer = floor(random()*availableCustomers.length)
@@ -898,42 +900,71 @@ function getRandomCustomer(currentDay, isTimeUp) {
   let dialogue = chosenCustomer.dialogue[0]; // extracts the dialogue for said customer
   day.servedCustomers.push(chosenCustomer.id); // marks them as already served
 
-  return{
+  return {
     character: chosenCustomer,
     order: dialogue
   };
 }
 
-class Character{
-  constructor(data){
+class Character {
+  constructor(data) {
     this.data = data; // character object properties
     
-    // Animation states
-    this.x = width*0.20
-    this.y = height+300; //off-screen
-    this.targetY = (height/2)-150;
-    this.state = "entering"; // entering, idle, success/fail, leaving
+    //———————— POSITIONING ————————
+    this.x = width * 0.20;
+    this.y = height + 300;
+    this.targetY = (height / 2) - 150;
+    this.state = "entering";
 
-    // Sprite settings
+    //———————— ANIMATION ————————
     this.currentAnimation = "idle";
     this.frameIndex = 0;
     this.frameTimer = 0;
+    this.reactionTimer = 0;
+    this.reactionDuration = 120;
+
+    //———————— PATIENCE ————————
+    this.maxPatience = 100;
+    this.patience = random(90, 100);
+    
+    let difficultyMult = 1 + (day.currentDay * 0.1);
+    let upgradeMult = day.getUpgradeMultiplier("patience_decay");
+    this.decayRate = (0.015 * difficultyMult) * upgradeMult;
   }
 
-  update(){
-    // Slide up animation
-    if(this.state === "entering"){
-      this.y = lerp(this.y, this.targetY, 0.15); // smooth animation
-      // changes state to idle while sliding up
-      if(abs(this.y-this.targetY) < 1){
-        this.y = this.targetY;
-        this.state = "idle";
-      }
-    }
+  reducePatience(amount) {
+    // manually lowers patience (e.g. asking for hint)
+    this.patience = Math.max(0, this.patience - amount);
+  }
 
-    // Slide down animation
-    else if(this.state === "leaving"){
-      this.y = lerp(this.y, height+400, 0.15); // smooth animation
+  triggerReaction(isSuccess) {
+    this.state = "reacting";
+    if(isSuccess) this.currentAnimation = "success";
+    else this.currentAnimation = "fail";
+    this.reactionTimer = 0;
+  }
+
+  update() {
+    // handles movement and frame updates
+    
+    // Movement Logic
+    if (this.state === "entering") {
+      this.y = lerp(this.y, this.targetY, 0.15); // smooth animation
+       // changes state to idle while sliding up
+      if (abs(this.y - this.targetY) < 1) { 
+        this.y = this.targetY; 
+        this.state = "idle"; 
+      }
+    } else if (this.state === "reacting") {
+      this.reactionTimer++;
+      if (this.reactionTimer > this.reactionDuration) {
+        this.state = "leaving";
+      }
+    } else if (this.state === "leaving") {
+      this.y = lerp(this.y, height + 400, 0.15);
+      if (this.y > height + 350) {
+        this.state = "hidden";
+      }
     }
 
     // Idle frames
@@ -941,22 +972,32 @@ class Character{
     if(this.frameTimer > 5){ // value controls how fast the animation is (lower = faster)
       this.frameTimer = 0;
       this.frameIndex++;
-
+      
       // resets loop
       let animationData = this.data.animData[this.currentAnimation];
       if(this.frameIndex >= animationData.frames) this.frameIndex = 0;
     }
+
+    // Patience Decay
+    if (this.state === "idle" || this.state === "waiting") {
+      this.patience -= this.decayRate;
+      
+      if (this.patience <= 0) {
+        this.patience = 0;
+        this.state = "leaving";
+        return "left_angry"; 
+      }
+    }
   }
 
-  display(){
-    // This function splits and displays customers
-
+  display() {
+    // draws the current frame from spritesheet
     let assetKey = this.data.id + "_" + this.currentAnimation; //find the loaded image
     let spriteSheet = characterAssets[assetKey];
-
-    if(spriteSheet){
+    
+    if (spriteSheet) {
       let animationData = this.data.animData[this.currentAnimation];
-
+      
       //———————— 8 IMAGE PROPERTIES ————————
       // coordinates on canvas
       let destX = this.x;
@@ -970,13 +1011,9 @@ class Character{
       // dimensions of original frames
       let sourceWidth = spriteSheet.width/animationData.frames;
       let sourceHeight = spriteSheet.height;
-
+      
       //Draws the character
       image(spriteSheet, destX, destY, destWidth, destHeight, sourceX, sourceY, sourceWidth, sourceHeight);
     }
-  }
-
-  leave(){
-    this.state = "leaving";
   }
 }
