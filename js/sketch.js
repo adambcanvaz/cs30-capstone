@@ -18,10 +18,11 @@ function preload() {
   loadIngredients();
   loadCharacters();
   loadUIIcons();
+  loadSounds();
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(1466, 868);
   imageMode(CENTER);
   if (uiFont) textFont(uiFont);
 

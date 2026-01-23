@@ -42,7 +42,7 @@ class SceneManager {
     ];
 
     // ——— UI COMPONENTS ———
-    this.speechBubble = new SpeechBubble(width / 2 - 200, 150, 450, 120);
+    this.speechBubble = new SpeechBubble(width / 2 - 250, 245, 450, 120);
     this.receiptPaper = new ReceiptPaper(width/2 - 200, height/2 - 250, 400, 500);
     this.shop = new ShopManager();
     
@@ -52,7 +52,7 @@ class SceneManager {
 
   initButtons() {
     // Clarify
-    this.clarifyBtn = new GameButton(width / 2 + 150, 250, 80, 40, "Huh?", "clarify", () => {
+    this.clarifyBtn = new GameButton(width / 2 + 100, 345, 80, 40, "Huh?", "clarify", () => {
       if (currentOrder && !currentOrder.isClarified) {
         currentOrder.clarify();
         if (this.activeCharacter) {
@@ -203,8 +203,12 @@ class SceneManager {
     }
 
     // ——— DRAW ENVIRONMENT ———
+    // Shadow underneath counter
+    push(); fill("rgba(0, 0, 0, 0.6)"); rectMode(CENTER);
+    rect(width/2, height*0.85, restaurantCounter.width * 0.65, restaurantCounter.height * 0.53);
+    pop();
     if (restaurantCounter) {
-      image(restaurantCounter, width / 2, height * 0.80, restaurantCounter.width * 0.5, restaurantCounter.height * 0.5);
+      image(restaurantCounter, width / 2, height * 0.80, restaurantCounter.width * 0.65, restaurantCounter.height * 0.53);
     }
     
     // ——— HUD RELATED ———
@@ -231,7 +235,7 @@ class SceneManager {
     // ——— DRAW ENVIRONMENT ———
     if (kitchenBg) image(kitchenBg, width / 2, height / 2, width, height);
     if (counter) image(counter, width / 2, height, width, height);
-    if (woodenBoard) image(woodenBoard, width / 2, (height / 2) + 145, width * 0.3, height * 0.3);
+    if (woodenBoard) image(woodenBoard, width / 2, (height / 2) + 145, width * 0.35, height * 0.3);
 
     // ——— BG CHARACTER LOGIC ———
     // allows character to continue updating while in kitchen
@@ -249,7 +253,7 @@ class SceneManager {
     }
 
     // ——— GAMEPLAY ———
-    burger.display(width * 0.5, height * 0.68);
+    burger.display(width * 0.5, height * 0.65);
     ui.display(day.currentDay, ingredientAssets);
     
     // ——— HUD ———

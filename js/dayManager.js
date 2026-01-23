@@ -5,37 +5,37 @@
 const DAYS = {
   1: { 
     pointsGoal: 100,
-    markupRate: 2.2,
+    markupRate: 2.25,
     serviceFee: 3.00,
     utilities: 15.00,
   },
   2: { 
     pointsGoal: 150, 
-    markupRate: 2.4, 
+    markupRate: 2.45, 
     serviceFee: 4.00, 
     utilities: 20.00,
   },
   3: { 
     pointsGoal: 250, 
-    markupRate: 2.6, 
+    markupRate: 2.65, 
     serviceFee: 5.00, 
     utilities: 30.00, 
   },
   4: { 
     pointsGoal: 375, 
-    markupRate: 2.8, 
+    markupRate: 2.85, 
     serviceFee: 6.00, 
     utilities: 40.00, 
   },
   5: { 
     pointsGoal: 500, 
-    markupRate: 3.0, 
+    markupRate: 3.05, 
     serviceFee: 7.00, 
     utilities: 50.00, 
   },
   6: { 
     pointsGoal: 650, 
-    markupRate: 3.3, 
+    markupRate: 3.35, 
     serviceFee: 8.50, 
     utilities: 60.00, 
   },
@@ -77,7 +77,7 @@ function clearSave() {
 
 class Day {
   constructor() {
-    this.currentDay = 1;
+    this.currentDay = 6;
     this.totalCash = 100; // starting cash
     this.burgerPoints = 0;
 

@@ -3,6 +3,7 @@
 // the Heads-Up Display (HUD), Speech Bubbles, and the Receipt system.
 
 let uiIcons = {};
+let sfx = {};
 
 const UI_STYLE = {
   globalRadius: 11.5,
@@ -61,6 +62,25 @@ function loadUIIcons() {
   uiIcons.clock = loadImage("assets/interface/hud/customer_patience_icon.png");
   uiIcons.xp = loadImage("assets/interface/hud/burger_points_icon.png");
   uiIcons.day = loadImage("assets/interface/hud/day_time_icon.png");
+}
+
+function loadSounds() {
+  // loads sounds for different scenes
+  soundFormats('mp3');
+  sfx.buttonClick = loadSound("assets/sfx/button_click_sfx.mp3");
+  sfx.buttonHover = loadSound("assets/sfx/button_hover_sfx.mp3");
+  sfx.whoosh = loadSound("assets/sfx/whoosh_sfx.mp3");
+  sfx.cashTransaction = loadSound("assets/sfx/money_transaction_sfx.mp3");
+  sfx.newDay = loadSound("assets/sfx/new_day_theme.mp3");
+  sfx.endOfDay = loadSound("assets/sfx/end_of_day_theme.mp3");
+  sfx.dayTheme = loadSound("assets/sfx/restaurant_soundtrack.mp3");
+  sfx.nightTheme = loadSound("assets/sfx/night_ambience_sound.mp3");
+
+  // adjust volumes
+  sfx.dayTheme.setVolume(0.2);
+  sfx.nightTheme.setVolume(0.2);
+  sfx.newDay.setVolume(0.5);
+  sfx.endOfDay.setVolume(0.5);
 }
 
 class UIBase {
@@ -393,7 +413,7 @@ class ShopCard extends UIBase {
     this.buyBtn = new GameButton(this.x + 10, this.y + 130, 120, 30, "$" + data.price, "shop", buyAction);
   }
 
-  display(isOwned, isLocked) {
+  display(isOwned, canAfford, isLocked) {
     if (!this.visible) return;
     
     let style = UI_STYLE.shopCard;
@@ -419,7 +439,7 @@ class ShopCard extends UIBase {
     
     noTint();
     noStroke(); fill(style.colors.text); textAlign(CENTER, CENTER); textSize(14); textWrap(WORD);
-    text(this.data.name, this.x + 10, this.y + 90, this.w - 20);
+    text(this.data.name, this.x + 10, this.y + 102, this.w - 20);
     
     // Status Text / Buy Button
     if (isOwned) {

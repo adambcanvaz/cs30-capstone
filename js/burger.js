@@ -39,7 +39,7 @@ class Burger {
       let finalY = baseY + ingredientYOffset + adjustY;
 
       //———————— DRAWING ————————
-      let targetWidth = 130 * adjustScale; // all ingredients scaled to this width (w/ adjustment)
+      let targetWidth = 140 * adjustScale; // all ingredients scaled to this width (w/ adjustment)
       let scaleFactor = ingredientImage.height / ingredientImage.width;
       let finalHeight = targetWidth * scaleFactor;
 

@@ -841,7 +841,7 @@ const CHARACTERS = {
     animData: {
       idle: { file: "assets/characters/elf_king/idle.png", frames: 7, loop: true },
       success: { file: "assets/characters/elf_king/dialogue.png", frames: 7, loop: false },
-      fail: { file: "assets/characters/elf_king/protection.png", frames: 5, loop: false }
+      fail: { file: "assets/characters/elf_king/protection.png", frames: 3, loop: false }
     },
     dialogue: [{
       order: "It has bestowed on me that a rival kingdom had praised your food dungeon. I desire the 'Midnight Feast'. Wagyu meat, dark mushrooms, spicy wasabi, rings of Tanzanite, and the egg of a flightless bird. Bless thee most royal sauce too.",
@@ -913,7 +913,7 @@ class Character {
     //———————— POSITIONING ————————
     this.x = width * 0.20;
     this.y = height + 300;
-    this.targetY = (height / 2) - 150;
+    this.targetY = (height / 2) - 110;
     this.state = "entering";
 
     //———————— ANIMATION ————————
@@ -1003,8 +1003,8 @@ class Character {
       let destX = this.x;
       let destY = this.y;
       // image scaling on canvas
-      let destWidth = 500; 
-      let destHeight = 500;
+      let destWidth = 625; 
+      let destHeight = 625;
       // coordinates of original for each frame
       let sourceX = this.frameIndex*(spriteSheet.width/animationData.frames);
       let sourceY = 0;
