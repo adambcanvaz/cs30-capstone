@@ -6,3 +6,10 @@ html, body {
 canvas {
   display: block;
 }
+
+@font-face {
+  font-family: 'ChelseaMarket';
+  src: url('./assets/fonts/ChelseaMarket-Regular.ttf') format('ttf');
+  font-weight: normal;
+  font-style: normal;
+}

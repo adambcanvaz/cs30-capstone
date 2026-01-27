@@ -12,6 +12,8 @@ let burger;
 let currentOrder;
 let sceneManager;
 
+let introAlpha = 255; // fade-in effect 
+
 function preload() {
   // Load all assets here
   loadSceneAssets(); 
@@ -37,6 +39,13 @@ function setup() {
 
 function draw() {
   sceneManager.run();
+
+  // Fade-In
+  if (introAlpha > 0) {
+    push(); fill(0, introAlpha);
+    rect(0, 0, width, height); pop();
+    introAlpha -= 9; // higher = faster
+  }
 }
 
 function keyPressed() {

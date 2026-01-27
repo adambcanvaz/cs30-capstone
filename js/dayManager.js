@@ -77,7 +77,7 @@ function clearSave() {
 
 class Day {
   constructor() {
-    this.currentDay = 6;
+    this.currentDay = 1;
     this.totalCash = 100; // starting cash
     this.burgerPoints = 0;
 

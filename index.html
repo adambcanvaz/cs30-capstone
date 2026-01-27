@@ -12,9 +12,6 @@
        p5 functions. Using this version while developing your code allows p5 
        to provide more Friendly Error Messages if you mess something up...-->
     <script src="libraries/p5.js"></script>
-    <h1 id="p5_loading">
-      B U R G E R 🍔
-    </h1>
 
     <!-- Once your project is working completely, you can comment out the link
        to p5.js above, and instead link to this minified version. The minified
@@ -22,11 +19,39 @@
        increases the speed of your program quite dramatically in some cases.-->
     <!-- <script src="libraries/p5.min.js"></script> -->
 
+    <style>
+      /* Canvas centered in the viewport */
+      body {
+        background-color: #000000;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden; /* removes scrollbars */
+      }
+      
+      /* Loading text styling */
+      #p5_loading {
+        color: white;
+        font-family: 'ChelseaMarket', sans-serif;
+        font-size: 24px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    </style>
+
     <script src="libraries/p5.sound.min.js"></script>
     <script src="libraries/p5.touchgui.js"></script>
   </head>
 
   <body>
+    <div id="p5_loading">
+       Grilling the pixels...
+    </div>
+
     <script src="js/ingredients.js"></script>
     <script src="js/burger.js"></script>
     <script src="js/order.js"></script>

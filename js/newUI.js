@@ -37,6 +37,18 @@ const UI_STYLE = {
     weights: { stroke: 4 }
   },
 
+  ticket: {
+    collapsedW: 50,  collapsedH: 60,
+    expandedW: 255, expandedH: 365,    
+    colors: { 
+      fill: ["rgb(245, 236, 228)"], 
+      stroke: ["rgba(107, 17, 36, 1)"], 
+      text: ["rgba(77, 21, 27, 1)"],
+      header: ["rgba(107, 17, 36, 1)"] 
+    },
+    weights: { stroke: 1.5 }
+  },
+
   receipt: {
     colors: { 
       fill: ["rgba(255, 255, 255, 1)"], 
@@ -222,7 +234,7 @@ class GameButton extends UIBase {
 }
 
 class SpeechBubble extends UIBase {
-  constructor(x, y, w, h) {
+  constructor(x, y, w, h, clarifyAction, okayAction) {
     super(x, y, w, h);
     this.fullText = "";
     this.displayedText = "";
@@ -230,6 +242,12 @@ class SpeechBubble extends UIBase {
     this.timer = 0;
     this.speed = 0.5; 
     this.isFinished = false;
+
+    // ——— INTERNAL BUTTONS ———
+    // Clarify Button
+    this.clarifyBtn = new GameButton(x + w - 180, y + h + 10, 80, 40, "Huh?", "clarify", clarifyAction);
+    // Okay Button
+    this.okayBtn = new GameButton(x + w - 90, y + h + 10, 80, 40, "Okay", "general", okayAction);
   }
 
   reset(newText) {
@@ -242,7 +260,7 @@ class SpeechBubble extends UIBase {
     this.isFinished = false;
   }
 
-  display(textStr, nameStr) {
+  display(textStr, nameStr, showButtons, isClarified) {
     if (!this.visible || !textStr) return;
 
     if (textStr !== this.fullText) this.reset(textStr);
@@ -299,6 +317,31 @@ class SpeechBubble extends UIBase {
     
     text(this.displayedText, this.x + 25, this.y + 25, this.w - 40, this.h - 40);
     pop();
+
+    // ——— DRAW BUTTONS ———
+    if (showButtons) {
+      if(!isClarified){
+        this.clarifyBtn.visible = true;
+        this.clarifyBtn.update(mouseX, mouseY);
+        this.clarifyBtn.display();
+      } else {
+        this.clarifyBtn.visible = false;
+      }
+      
+      this.okayBtn.visible = true;
+      this.okayBtn.update(mouseX, mouseY);
+      this.okayBtn.display();
+    } else {
+      this.clarifyBtn.visible = false;
+      this.okayBtn.visible = false;
+    }
+  }
+
+  handleClick(mx, my){
+    if(!this.visible) return false;
+    if(this.okayBtn.visible && this.okayBtn.handleClick(mx, my)) return true;
+    if(this.clarifyBtn.visible && this.clarifyBtn.handleClick(mx, my)) return true;
+    return false;
   }
 
   drawBubbleShape(x, y, w, h){
@@ -461,5 +504,113 @@ class ShopCard extends UIBase {
 
   handleClick(mx, my) {
     if (this.buyBtn.visible) this.buyBtn.handleClick(mx, my);
+  }
+}
+
+class OrderTicket extends UIBase {
+  constructor(x) {
+    super(x, -10, UI_STYLE.ticket.collapsedW, UI_STYLE.ticket.collapsedH); 
+    this.currentW = UI_STYLE.ticket.collapsedW;
+    this.currentH = UI_STYLE.ticket.collapsedH;
+    this.teethCount = 5; // number of jagged teeth at bottom
+  }
+
+  update(mx, my) {
+    let leftX = this.x - (this.currentW/2);
+    let rightX = this.x + (this.currentW/2);
+    
+    let isHovered = (mx > leftX && mx < rightX && my < this.currentH + 10);
+    
+    let targetW; let targetH;
+    if(isHovered){
+      targetW = UI_STYLE.ticket.expandedW;
+      targetH = UI_STYLE.ticket.expandedH;
+    }
+    else if(!isHovered){
+      targetW = UI_STYLE.ticket.collapsedW;
+      targetH = UI_STYLE.ticket.collapsedH;
+    }
+    
+    // in-out animation
+    this.currentW = lerp(this.currentW, targetW, 0.38);
+    this.currentH = lerp(this.currentH, targetH, 0.38);
+    
+    this.w = this.currentW;
+    this.h = this.currentH;
+  }
+
+  display(orderText) {
+    if (!orderText) return;
+    let style = UI_STYLE.ticket;
+    let leftX = this.x - (this.currentW/2);
+
+    push();
+    
+    // ——— MODAL OVERLAY (dark layer) ———
+    // Map opacity from 0 to 150 (semi-transparent black).
+    let dimAlpha = map(this.currentH, style.collapsedH, style.expandedH, 0, 150);
+    dimAlpha = constrain(dimAlpha, 0, 150);
+    
+    if (dimAlpha > 10) {
+      noStroke();
+      fill(0, 0, 0, dimAlpha);
+      rect(0, 0, width, height);
+    }
+
+    // ——— DRAW TICKET ———
+    fill(style.colors.fill);
+    stroke(style.colors.stroke);
+    strokeWeight(style.weights.stroke);
+    strokeJoin(ROUND); 
+    
+    let toothSize = this.currentW / this.teethCount;
+    
+    beginShape();
+    vertex(leftX, this.y); // top left
+    vertex(leftX + this.currentW, this.y); // top right
+    vertex(leftX + this.currentW, this.y + this.currentH - 10); // bottom right before teeth
+    
+    // bottom jagged lines, right to left
+    for (let i = 0; i < this.teethCount; i++) {
+      let currX = (leftX + this.currentW) - (i * toothSize);
+      vertex(currX - (toothSize/2), this.y + this.currentH);
+      vertex(currX - toothSize, this.y + this.currentH - 8); 
+    }
+    
+    // close top left
+    vertex(leftX, this.y);
+    endShape(CLOSE);
+
+    // ——— DRAW HEADER ———
+    noStroke();
+    textAlign(CENTER, TOP);
+    textStyle(BOLD);
+    textSize(15);
+    fill(style.colors.header);
+    
+    if (this.currentW < 150) {
+      text("?", this.x, this.y + 25); // !!replace with scribbles png!!
+    } else {
+      text("ORDER #00" + day.servedCustomers.length, this.x, this.y + 25);
+    }
+
+    // ——— DRAW BODY TEXT ———
+    // fade in text
+    let alpha = map(this.currentH, style.expandedH * 0.7, style.expandedH * 0.95, 0, 255);
+    alpha = constrain(alpha, 0, 255);
+
+    if (alpha > 5) {
+      textAlign(LEFT, TOP);
+      textStyle(NORMAL);
+      textSize(18); 
+      textLeading(24); 
+      fill(40, 40, 40, alpha);
+      
+      let padding = 25;
+      let stableTextWidth = style.expandedW - (padding * 2);
+      text(orderText, leftX + padding, this.y + 60, stableTextWidth, this.currentH - 80);
+    }
+
+    pop();
   }
 }

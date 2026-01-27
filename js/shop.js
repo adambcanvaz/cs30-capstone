@@ -78,7 +78,10 @@ class ShopManager {
 
     this.nextDayBtn = new GameButton(width - 170, height - 80, 150, 50, "Next Day", "general", () => {
       day.nextDay();
-      sceneManager.startDay();
+      // Fade out, then start the day when screen is black
+      sceneManager.switchScene("restaurant", () => {
+        sceneManager.startDay();
+      });
     });
   }
 

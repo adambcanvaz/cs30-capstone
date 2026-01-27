@@ -3,7 +3,7 @@
 // and handles global drawing and input delegation.
 
 let uiFont;
-let mainMenuBg, restaurantBg, summaryShopBg, kitchenBg; 
+let mainMenuBg, restaurantBg, summaryShopBg, kitchenBg;
 let counter, woodenBoard, restaurantCounter;
 
 function loadSceneAssets() {
@@ -24,81 +24,210 @@ class SceneManager {
     this.activeCharacter = null;
     this.spawnTimer = 0;
 
+    // ——— TRANSITION SYSTEM ———
+    this.fadeAlpha = 0;
+    this.fadeState = "none"; // "in", "out", "none"
+    this.nextState = null;
+    this.fadeSpeed = 10; // Speed of fade (Higher = Faster)
+    this.onSceneSwitch = null; // Callback for when screen is black
+
+    // ——— SLIDING SYSTEM ———
+    this.slideY = 0;
+    this.targetSlideY = 0;
+    this.isServing = false;
+
     // ——— HUD ELEMENTS ———
     this.hudElements = [
-      new HUDWidget(15, 15, 180, uiIcons.day, () => { 
-        return "Day " + day.currentDay + "   " + day.getClockFormat(); 
+      new HUDWidget(15, 15, 180, uiIcons.day, () => {
+        return "Day " + day.currentDay + "   " + day.getClockFormat();
       }),
-      new HUDWidget(210, 15, 100, uiIcons.clock, () => { 
-        if(this.activeCharacter) return floor(this.activeCharacter.patience) + "%"; 
+      new HUDWidget(210, 15, 100, uiIcons.clock, () => {
+        if (this.activeCharacter) return floor(this.activeCharacter.patience) + "%";
         else return "---";
       }),
-      new HUDWidget(width - 115, 15, 100, uiIcons.money, () => { 
-        return "$" + day.totalCash.toFixed(2); 
+      new HUDWidget(width - 115, 15, 100, uiIcons.money, () => {
+        return "$" + day.totalCash.toFixed(2);
       }),
-      new HUDWidget(width - 235, 15, 100, uiIcons.xp, () => { 
-        return day.burgerPoints; 
+      new HUDWidget(width - 235, 15, 100, uiIcons.xp, () => {
+        return day.burgerPoints;
       })
     ];
 
     // ——— UI COMPONENTS ———
-    this.speechBubble = new SpeechBubble(width / 2 - 250, 245, 450, 120);
-    this.receiptPaper = new ReceiptPaper(width/2 - 200, height/2 - 250, 400, 500);
+    let clarifyAction = () => {
+      if (currentOrder && !currentOrder.isClarified) {
+        currentOrder.clarify();
+        if (this.activeCharacter) this.activeCharacter.reducePatience(7);
+      }
+    };
+
+    let okayAction = () => {
+      if (currentOrder && currentOrder.paidAmount) {
+        day.logSale(currentOrder.paidAmount);
+      }
+      if (this.activeCharacter) this.activeCharacter.startPatience();
+
+      // Hide Bubble immediately
+      this.speechBubble.visible = false;
+
+      // Buffer before sliding to kitchen
+      setTimeout(() => {
+        this.switchScene("kitchen");
+      }, 600);
+    };
+    this.speechBubble = new SpeechBubble(width / 2 - 250, 245, 450, 120, clarifyAction, okayAction);
+    this.receiptPaper = new ReceiptPaper(width / 2 - 200, height / 2 - 250, 400, 500);
+    this.orderTicket = new OrderTicket(370);
     this.shop = new ShopManager();
-    
+
     // ——— BUTTONS ———
     this.initButtons();
   }
 
-  initButtons() {
-    // Clarify
-    this.clarifyBtn = new GameButton(width / 2 + 100, 345, 80, 40, "Huh?", "clarify", () => {
-      if (currentOrder && !currentOrder.isClarified) {
-        currentOrder.clarify();
-        if (this.activeCharacter) {
-          this.activeCharacter.reducePatience(10);
-        }
-      }
-    });
+  // ——— TRANSITION LOGIC ———
 
+  switchScene(targetState, callback) {
+    // Sliding (Restaurant <-> Kitchen)
+    if (this.state === "restaurant" && targetState === "kitchen") {
+      // Going to kitchen: kitchen slides UP from bottom
+      this.state = "kitchen";
+      this.slideY = height;
+      this.targetSlideY = 0;
+      return;
+    }
+
+    if (this.state === "kitchen" && targetState === "restaurant") {
+      // Going to restaurant: restaurant slides DOWN from top
+      this.state = "restaurant";
+      this.slideY = -height; // Start at top
+      this.targetSlideY = 0;
+      return;
+    }
+
+    // Fade (between every other scene)
+    if (this.state === targetState) return;
+
+    this.nextState = targetState;
+    this.onSceneSwitch = callback || null;
+    this.fadeState = "out";
+  }
+
+  handleTransitions() {
+    // Sliding Logic
+    this.slideY = lerp(this.slideY, this.targetSlideY, 0.15);
+    if (abs(this.slideY - this.targetSlideY) < 1) this.slideY = this.targetSlideY;
+
+    // Fade Logic
+    if (this.fadeState === "none") return;
+
+    if (this.fadeState === "out") {
+      this.fadeAlpha += this.fadeSpeed;
+      if (this.fadeAlpha >= 255) {
+        this.fadeAlpha = 255;
+        this.state = this.nextState; // switches here
+        this.slideY = 0; // reset slide
+        if (this.onSceneSwitch) {
+          this.onSceneSwitch(); // run callback
+          this.onSceneSwitch = null;
+        }
+        this.fadeState = "in";
+      }
+    } else if (this.fadeState === "in") {
+      this.fadeAlpha -= this.fadeSpeed;
+      if (this.fadeAlpha <= 0) {
+        this.fadeAlpha = 0;
+        this.fadeState = "none";
+      }
+    }
+  }
+
+  initButtons() {
     // Go To Shop
     this.goToShopBtn = new GameButton(width - 170, height - 80, 150, 50, "Shop", "shop", () => {
-      this.shop.refresh();
-      this.state = "shop";
+      this.switchScene("shop", () => {
+        this.shop.refresh();
+      });
     });
 
     // Retry Day
     this.btnRetry = new GameButton(width - 170, height - 80, 150, 50, "Retry Day", "general", () => {
-      day.resetDailyTrackers();
-      day.startShift(); 
-      sceneManager.startDay(); 
+      this.switchScene("restaurant", () => {
+        day.resetDailyTrackers();
+        day.startShift();
+        this.startDay();
+      });
     });
 
     // New Game
-    this.btnNewGame = new GameButton(width/2 - 100, height/2, 200, 50, "New Game", "general", () => {
-      clearSave();
-      day = new Day();
-      sceneManager.startDay();
+    this.btnNewGame = new GameButton(width / 2 - 100, height / 2, 200, 50, "New Game", "general", () => {
+      this.switchScene("restaurant", () => {
+        clearSave();
+        day = new Day();
+        this.startDay();
+      });
     });
 
     // Continue
-    this.btnContinue = new GameButton(width/2 - 100, height/2 + 70, 200, 50, "Continue", "general", () => {
+    this.btnContinue = new GameButton(width / 2 - 100, height / 2 + 70, 200, 50, "Continue", "general", () => {
       if (loadGame()) {
-        this.shop.refresh();
-        this.state = "shop";
+        this.switchScene("shop", () => {
+          this.shop.refresh();
+        });
       }
     });
   }
 
   // ——— MAIN LOOP ———
-  
+
   run() {
-    switch (this.state) {
-      case "mainMenu":   this.drawMainMenu(); break;
-      case "restaurant": this.drawRestaurant(); break;
-      case "kitchen":    this.drawKitchen(); break;
-      case "summary":    this.drawSummary(); break;
-      case "shop":       this.shop.display(); break; 
+    this.handleTransitions();
+
+    // ——— SLIDING SCENES ———
+    if (this.state === "restaurant" || this.state === "kitchen") {
+      // Active layer is the foreground, other is background layer.
+
+      if (this.state === "kitchen") {
+        this.drawRestaurant(); // becomes background
+        // draw foreground
+        push();
+        translate(0, this.slideY);
+        this.drawKitchen();
+        pop();
+      }
+
+      else if (this.state === "restaurant") {
+        this.drawKitchen(); // becomes background
+        // draw foreground
+        push();
+        translate(0, this.slideY);
+        this.drawRestaurant();
+        pop();
+      }
+
+      // HUD (TOP LAYER)
+      day.startTime();
+      this.drawHUD();
+      if (currentOrder) {
+        this.orderTicket.update(mouseX, mouseY);
+        this.orderTicket.display(currentOrder.dialogueText);
+      }
+    }
+    
+    // ——— STANDARD SCENES ———
+    else {
+      switch (this.state) {
+        case "mainMenu": this.drawMainMenu(); break;
+        case "summary": this.drawSummary(); break;
+        case "shop": this.shop.display(); break;
+      }
+    }
+
+    // Draw fade overlay
+    if (this.fadeAlpha > 0) {
+      push(); noStroke(); 
+      fill(0, this.fadeAlpha); 
+      rect(0, 0, width, height); 
+      pop();
     }
   }
 
@@ -106,7 +235,13 @@ class SceneManager {
 
   startDay() {
     day.startShift();
-    this.nextCustomer();
+    // Set timer to a negative number so automatic loop 
+    // stops spawning regularly scheduled customer.
+    this.spawnTimer = -1000;
+    // Delay the first customer so they don't appear instantly during fade-in
+    setTimeout(() => {
+      this.nextCustomer();
+    }, 1500); // 1.5 second delay
   }
 
   nextCustomer() {
@@ -117,24 +252,32 @@ class SceneManager {
       // Setup New Order
       currentOrder = new Order(day.currentDay, day.unlockedIngredients);
       currentOrder.createFromData(customerData.order);
-      
+
       // Setup Character
       this.activeCharacter = new Character(customerData.character);
+
+      // Start hidden, show after delay
+      this.speechBubble.visible = false;
       this.speechBubble.reset(currentOrder.dialogueText);
+
+      setTimeout(() => {
+        // Only show if character is still there (player didn't quit to menu)
+        if (this.activeCharacter) this.speechBubble.visible = true; // re-show bubble
+      }, 600); // 0.6s delay before talking starts
 
       // Charge burger before entering kitchen
       let config = day.getConfig();
       let basePrice = currentOrder.calculatePrice(config.markupRate, config.serviceFee);
-      
-      day.logSale(basePrice);
       currentOrder.paidAmount = basePrice;
 
       this.state = "restaurant";
-    } else {
+      this.slideY = 0; // restaurant is fully visible instantly
+    } 
+    else {
       // End of Day
       day.endShift();
       saveGame();
-      this.state = "summary";
+      this.switchScene("summary");
     }
   }
 
@@ -142,14 +285,14 @@ class SceneManager {
 
   drawMainMenu() {
     if (mainMenuBg) image(mainMenuBg, width / 2, height / 2, width, height);
-    
+
     push();
     textAlign(CENTER); fill(255); strokeWeight(5); stroke('black');
-    textSize(50); text("GOOD BURGER, PHENOMENAL BURGER.", width/2, height/2 - 80);
+    textSize(50); text("GOOD BURGER, PHENOMENAL BURGER.", width / 2, height / 2 - 80);
     pop();
-    
+
     let saveExists = hasSaveFile();
-    this.btnNewGame.update(mouseX, mouseY); 
+    this.btnNewGame.update(mouseX, mouseY);
     this.btnNewGame.display();
 
     // For showing resume/continue button or just New Game
@@ -158,10 +301,10 @@ class SceneManager {
 
       if (savedData && savedData.currentDay) {
         let savedDay = savedData.currentDay;
-        
+
         this.btnContinue.label = "Continue (Day " + savedDay + ")";
         this.btnContinue.visible = true;
-        this.btnContinue.update(mouseX, mouseY); 
+        this.btnContinue.update(mouseX, mouseY);
         this.btnContinue.display();
       } else {
         this.btnContinue.visible = false;
@@ -178,6 +321,10 @@ class SceneManager {
     if (this.activeCharacter) {
       let isReading = !this.speechBubble.isFinished;
       let status = this.activeCharacter.update(isReading);
+
+      // Hide bubble if they leave
+      if (this.activeCharacter.state === "leaving") this.speechBubble.visible = false;
+
       this.activeCharacter.display();
 
       // Check for Rage Quit
@@ -186,14 +333,16 @@ class SceneManager {
           day.logRefund(currentOrder.paidAmount);
         }
         currentOrder = null;
+
+        if (this.state === "kitchen") this.switchScene("restaurant");
       }
-      
+
       // Check for Departure
       if (this.activeCharacter.state === "hidden") {
         this.activeCharacter = null;
         this.spawnTimer = 0;
       }
-      
+
       // UI Interaction
       this.drawRestaurantUI();
     } else {
@@ -205,28 +354,37 @@ class SceneManager {
     // ——— DRAW ENVIRONMENT ———
     // Shadow underneath counter
     push(); fill("rgba(0, 0, 0, 0.6)"); rectMode(CENTER);
-    rect(width/2, height*0.85, restaurantCounter.width * 0.65, restaurantCounter.height * 0.53);
+    rect(width / 2, height * 0.85, restaurantCounter.width * 0.65, restaurantCounter.height * 0.53);
     pop();
     if (restaurantCounter) {
       image(restaurantCounter, width / 2, height * 0.80, restaurantCounter.width * 0.65, restaurantCounter.height * 0.53);
     }
-    
-    // ——— HUD RELATED ———
-    day.startTime();
-    this.drawHUD();
   }
 
   drawRestaurantUI() {
-    // Only show bubble/buttons if character is present and not leaving
-    if (this.activeCharacter && (this.activeCharacter.state === "idle" || this.activeCharacter.state === "reacting")) {
+    if (this.state === "restaurant" && abs(this.slideY) > 10) return;
+    if (this.state === "kitchen") return;
+
+    if (this.isServing) return;
+
+    // Only show bubble if character is present and not hidden
+    if (this.activeCharacter && this.activeCharacter.state !== "hidden") {
+
+      // Show Buttons ONLY if characer is idle
+      let showButtons = (this.activeCharacter.state === "idle");
+
+      // hide the hint button if used
+      let isClarified;
+      if(currentOrder) isClarified = currentOrder.isClarified;
+      else if(!currentOrder) isClarified = false;
+
       if (currentOrder) {
-        this.speechBubble.display(currentOrder.dialogueText, this.activeCharacter.data.name);
-      }
-      
-      // Clarify button only available when idle
-      if (this.activeCharacter.state === "idle" && currentOrder && !currentOrder.isClarified) {
-        this.clarifyBtn.update(mouseX, mouseY);
-        this.clarifyBtn.display();
+        this.speechBubble.display(
+          currentOrder.dialogueText,
+          this.activeCharacter.data.name,
+          showButtons,
+          isClarified
+        );
       }
     }
   }
@@ -237,35 +395,16 @@ class SceneManager {
     if (counter) image(counter, width / 2, height, width, height);
     if (woodenBoard) image(woodenBoard, width / 2, (height / 2) + 145, width * 0.35, height * 0.3);
 
-    // ——— BG CHARACTER LOGIC ———
-    // allows character to continue updating while in kitchen
-    if (this.activeCharacter) {
-      let status = this.activeCharacter.update();
-      if (status === "left_angry") {
-        if (currentOrder && currentOrder.paidAmount) {
-          day.logRefund(currentOrder.paidAmount);
-        }
-        currentOrder = null;
-        burger.clear();
-        this.state = "restaurant";
-        return; 
-      }
-    }
-
     // ——— GAMEPLAY ———
     burger.display(width * 0.5, height * 0.65);
     ui.display(day.currentDay, ingredientAssets);
-    
-    // ——— HUD ———
-    day.startTime();
-    this.drawHUD();
   }
 
   drawSummary() {
     if (summaryShopBg) image(summaryShopBg, width / 2, height / 2, width, height);
-    
+
     // ——— RECEIPT ———
-    let report = day.dailyReport; 
+    let report = day.dailyReport;
     this.receiptPaper.display(report, day.currentDay);
 
     // Goal Check & Buttons
@@ -273,20 +412,20 @@ class SceneManager {
     let earned = day.burgerPoints;
     let isGoalReached = earned >= goal;
 
-    push(); 
-    textAlign(CENTER); 
+    push();
+    textAlign(CENTER);
     textSize(24);
-    
+
     // ——— NEXT DAY OR NOT? ———
-    if(isGoalReached) {
+    if (isGoalReached) {
       fill(0, 150, 0);
-      text("Goal Reached! (" + earned + "/" + goal + " XP)", width/2, height - 125);
-      this.goToShopBtn.update(mouseX, mouseY); 
+      text("Goal Reached! (" + earned + "/" + goal + " XP)", width / 2, height - 125);
+      this.goToShopBtn.update(mouseX, mouseY);
       this.goToShopBtn.display();
     } else {
       fill(200, 0, 0);
-      text("Goal Failed... (" + earned + "/" + goal + " XP)", width/2, height - 125);
-      this.btnRetry.update(mouseX, mouseY); 
+      text("Goal Failed... (" + earned + "/" + goal + " XP)", width / 2, height - 125);
+      this.btnRetry.update(mouseX, mouseY);
       this.btnRetry.display();
     }
     pop();
@@ -296,29 +435,30 @@ class SceneManager {
     for (let i = 0; i < this.hudElements.length; i++) {
       this.hudElements[i].display();
     }
-    
+
     //Helper Text for Mr Scott!!!
-    push(); 
-    textAlign(LEFT, TOP); 
-    textSize(18); 
-    fill(0); 
-    stroke(255); 
+    push();
+    textAlign(LEFT, TOP);
+    textSize(18);
+    fill(0);
+    stroke(255);
     strokeWeight(3);
-    
+
     let orderText;
-    if(!currentOrder) orderText = "No Order...";
-    else if(currentOrder) orderText = currentOrder.targetStack;
+    if (!currentOrder) orderText = "No Order...";
+    else if (currentOrder) orderText = currentOrder.targetStack;
     text(orderText, 20, 100);
-    
+
     pop();
   }
 
   // ——— INPUT STUFF ———
 
   handleInput(key) {
+    if (this.fadeState !== "none") return;
     if (this.state === "restaurant") {
-      if(this.activeCharacter && this.activeCharacter.state !== "idle") return;
-      if (key === " ") this.state = "kitchen"; 
+      // Inputs mostly handled by Okay/Clarify buttons
+      if (this.activeCharacter && this.activeCharacter.state !== "idle") return;
     }
     else if (this.state === "kitchen") {
       this.handleKitchenInput(key);
@@ -330,7 +470,7 @@ class SceneManager {
   }
 
   handleKitchenInput(key) {
-    if (key === " ") {
+    if (key === "Enter") {
       // Serve Order
       if (burger.burgerStack.length > 0) {
         this.processServing();
@@ -343,38 +483,51 @@ class SceneManager {
   }
 
   processServing() {
+    this.isServing = true; // Prevent multiple serves
     let isSuccess = currentOrder.checkOrderMatch(burger.burgerStack);
 
-    // ——— UPDATE DIALOGUE ———
-    if(isSuccess) currentOrder.dialogueText = currentOrder.successLine;
-    else if(!isSuccess) currentOrder.dialogueText = currentOrder.failLine;
-    this.speechBubble.reset(currentOrder.dialogueText); 
-
-    // ——— FINANCIAL ———
-    if (isSuccess) {
-      let tipRate;
-      if(currentOrder.hasPenalty) tipRate = 0.20;
-      else if(!currentOrder.hasPenalty) tipRate = 0.50;
-      tipRate *= day.getUpgradeMultiplier("tip_rate");
-      
-      let actualTip = (currentOrder.paidAmount * tipRate) * (this.activeCharacter.patience / 100);
-      
-      if (actualTip > 0) day.logTip(actualTip);
-      day.logPoints(25); 
-    } else {
-      day.logRefund(currentOrder.paidAmount);
-    }
-
     // ——— TRANSITION ———
-    this.state = "restaurant";
-    if (this.activeCharacter) {
-        this.activeCharacter.triggerReaction(isSuccess);
-    }
+    this.switchScene("restaurant");
     burger.clear();
+
+    // Wait for slide to finish, THEN show reaction
+    setTimeout(() => {
+      // ——— LOGIC UPDATE ———
+      if (isSuccess) currentOrder.dialogueText = currentOrder.successLine;
+      else if (!isSuccess) currentOrder.dialogueText = currentOrder.failLine;
+
+      this.speechBubble.visible = true;
+      this.speechBubble.reset(currentOrder.dialogueText);
+
+      if (this.activeCharacter) {
+        this.activeCharacter.triggerReaction(isSuccess);
+      }
+
+      // ——— FINANCIAL ———
+      if (isSuccess) {
+        let tipRate;
+        if(currentOrder.hasPenalty) tipRate = 0.20;
+        else if(!currentOrder.hasPenalty) tipRate = 0.50;
+
+        tipRate *= day.getUpgradeMultiplier("tip_rate");
+        let actualTip = (currentOrder.paidAmount * tipRate) * (this.activeCharacter.patience / 100);
+
+        if (actualTip > 0) day.logTip(actualTip);
+        day.logPoints(25);
+      } 
+      else {
+        day.logRefund(currentOrder.paidAmount);
+      }
+
+      this.isServing = false;
+
+    }, 1000);
   }
 
   handleMouse(mx, my) {
-    switch(this.state) {
+    if (this.fadeState !== "none") return;
+
+    switch (this.state) {
       case "mainMenu":
         this.btnNewGame.handleClick(mx, my);
         if (this.btnContinue.visible) this.btnContinue.handleClick(mx, my);
@@ -383,7 +536,7 @@ class SceneManager {
         ui.update(mx, my, day.currentDay, burger);
         break;
       case "restaurant":
-        if (this.activeCharacter && this.activeCharacter.state === "idle") this.clarifyBtn.handleClick(mx, my);
+        if (this.activeCharacter && this.activeCharacter.state === "idle") this.speechBubble.handleClick(mx, my);
         break;
       case "shop":
         this.shop.handleClick(mx, my);

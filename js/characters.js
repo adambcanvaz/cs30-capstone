@@ -914,7 +914,7 @@ class Character {
     this.x = width * 0.20;
     this.y = height + 300;
     this.targetY = (height / 2) - 110;
-    this.state = "entering";
+    this.state = "entering"; // entering, idle, waiting, reacting, leaving, hidden
 
     //———————— ANIMATION ————————
     this.currentAnimation = "idle";
@@ -925,11 +925,17 @@ class Character {
 
     //———————— PATIENCE ————————
     this.maxPatience = 100;
-    this.patience = random(90, 100);
+    this.patience = random(95, 100);
+    this.isPatienceActive = false; // New flag: logic switch for decay
     
     let difficultyMult = 1 + (day.currentDay * 0.1);
     let upgradeMult = day.getUpgradeMultiplier("patience_decay");
     this.decayRate = (0.015 * difficultyMult) * upgradeMult;
+  }
+
+  startPatience() {
+    this.isPatienceActive = true;
+    this.state = "waiting";
   }
 
   reducePatience(amount) {
@@ -979,7 +985,7 @@ class Character {
     }
 
     // Patience Decay
-    if (this.state === "idle" || this.state === "waiting") {
+    if ((this.state === "idle" || this.state === "waiting") && this.isPatienceActive) {
       this.patience -= this.decayRate;
       
       if (this.patience <= 0) {
