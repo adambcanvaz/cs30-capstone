@@ -12,6 +12,9 @@ let burger;
 let currentOrder;
 let sceneManager;
 
+const canvasWidth = 1466;
+const canvasHeight = 868;
+
 let introAlpha = 255; // fade-in effect 
 
 function preload() {
@@ -24,7 +27,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(1466, 868);
+  createCanvas(canvasWidth, canvasHeight);
   imageMode(CENTER);
   if (uiFont) textFont(uiFont);
 
@@ -54,4 +57,12 @@ function keyPressed() {
 
 function mousePressed(){
   sceneManager.handleMouse(mouseX, mouseY);
+}
+
+function mouseDragged() {
+  sceneManager.handleMouseDrag(mouseX, mouseY);
+}
+
+function mouseReleased() {
+  sceneManager.handleMouseRelease();
 }

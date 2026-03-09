@@ -930,7 +930,7 @@ class Character {
     
     let difficultyMult = 1 + (day.currentDay * 0.1);
     let upgradeMult = day.getUpgradeMultiplier("patience_decay");
-    this.decayRate = (0.015 * difficultyMult) * upgradeMult;
+    this.decayRate = (0.01 * difficultyMult) * upgradeMult;
   }
 
   startPatience() {

@@ -24,6 +24,15 @@ class SceneManager {
     this.activeCharacter = null;
     this.spawnTimer = 0;
 
+    // ——— CAMERA SYSTEM ———
+    // Kitchen is 1.5 screens wide. 
+    // Start at 0 (Left/Hot Side). Scroll Right to see Assembly.
+    this.cameraX = 0; 
+    
+    this.isDraggingCam = false;
+    this.dragStartX = 0;
+    this.camStartX = 0;
+
     // ——— TRANSITION SYSTEM ———
     this.fadeAlpha = 0;
     this.fadeState = "none"; // "in", "out", "none"
@@ -67,6 +76,9 @@ class SceneManager {
       }
       if (this.activeCharacter) this.activeCharacter.startPatience();
 
+      // Drop ticket down
+      this.orderTicket.dropIn();
+
       // Hide Bubble immediately
       this.speechBubble.visible = false;
 
@@ -93,6 +105,7 @@ class SceneManager {
       this.state = "kitchen";
       this.slideY = height;
       this.targetSlideY = 0;
+      this.cameraX = 0; // Reset to Left (Hot Side)
       return;
     }
 
@@ -207,6 +220,7 @@ class SceneManager {
       // HUD (TOP LAYER)
       day.startTime();
       this.drawHUD();
+      // If ticket exists, then...
       if (currentOrder) {
         this.orderTicket.update(mouseX, mouseY);
         this.orderTicket.display(currentOrder.dialogueText);
@@ -390,13 +404,37 @@ class SceneManager {
   }
 
   drawKitchen() {
-    // ——— DRAW ENVIRONMENT ———
-    if (kitchenBg) image(kitchenBg, width / 2, height / 2, width, height);
-    if (counter) image(counter, width / 2, height, width, height);
-    if (woodenBoard) image(woodenBoard, width / 2, (height / 2) + 145, width * 0.35, height * 0.3);
+    // ——— DRAW ENVIRONMENT/WORLD ———
+    push(); translate(this.cameraX, 0);
+
+    // 1. The Walls (Wide 1.5x Asset)
+    if (kitchenBg) {
+      image(kitchenBg, width * 0.75, height / 2, width * 1.5, height);
+    }
+    
+    // 2. The Counter (Wide 1.5x Asset)
+    // We draw this centered at the same spot as the background
+    if (counter) {
+      image(counter, width * 0.75, height, width * 1.5, height);
+    }
+    
+    // ——— FURNITURE/INTERACTABLES ———
+    // These belong to specific zones.
+    
+    // Assembly Zone (Centered at the seam, x = width * 1.0)
+    let assemblyX = width * 1.0; 
+    
+    // The Cutting Board sits on top of the wide counter
+    if (woodenBoard) {
+      image(woodenBoard, assemblyX, (height / 2) + 145, width * 0.35, height * 0.3);
+    }
+
+    // The Burger sits on the board
+    burger.display(assemblyX, height * 0.65);
+
+    pop();
 
     // ——— GAMEPLAY ———
-    burger.display(width * 0.5, height * 0.65);
     ui.display(day.currentDay, ingredientAssets);
   }
 
@@ -486,6 +524,9 @@ class SceneManager {
     this.isServing = true; // Prevent multiple serves
     let isSuccess = currentOrder.checkOrderMatch(burger.burgerStack);
 
+    // Pull ticket back up
+    this.orderTicket.pullUp();
+
     // ——— TRANSITION ———
     this.switchScene("restaurant");
     burger.clear();
@@ -546,5 +587,34 @@ class SceneManager {
         else this.btnRetry.handleClick(mx, my);
         break;
     }
+  }
+
+  // ——— CAMERA INPUT ———
+
+  handleMouseDrag(mx, my) {
+    if (this.state === "kitchen") {
+      // NOTE: Later, we will add a check: if(isHoldingIngredient) return;
+      // For now, dragging anywhere pans the camera.
+      
+      if (!this.isDraggingCam) {
+         this.isDraggingCam = true;
+         this.dragStartX = mx;
+         this.camStartX = this.cameraX;
+      }
+      
+      if (this.isDraggingCam) {
+        let diff = mx - this.dragStartX;
+        this.cameraX = this.camStartX + diff;
+        
+        // CONSTRAIN CAMERA (1.5 Screens)
+        // Left Limit: -width * 0.5 (Right Screen visible)
+        // Right Limit: 0 (Left Screen visible)
+        this.cameraX = constrain(this.cameraX, -(width * 0.5), 0);
+      }
+    }
+  }
+
+  handleMouseRelease() {
+    this.isDraggingCam = false;
   }
 }

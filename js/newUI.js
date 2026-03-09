@@ -509,17 +509,31 @@ class ShopCard extends UIBase {
 
 class OrderTicket extends UIBase {
   constructor(x) {
-    super(x, -10, UI_STYLE.ticket.collapsedW, UI_STYLE.ticket.collapsedH); 
+    super(x, -300, UI_STYLE.ticket.collapsedW, UI_STYLE.ticket.collapsedH); 
     this.currentW = UI_STYLE.ticket.collapsedW;
     this.currentH = UI_STYLE.ticket.collapsedH;
     this.teethCount = 5; // number of jagged teeth at bottom
+
+    // Pull-down/up animation
+    this.targetY = -300;
+    this.y = -300;
+  }
+
+  dropIn(){
+    this.targetY = -10;
+  }
+
+  pullUp(){
+    this.targetY = -300;
   }
 
   update(mx, my) {
+    this.y = lerp(this.y, this.targetY, 0.1);
+
     let leftX = this.x - (this.currentW/2);
     let rightX = this.x + (this.currentW/2);
     
-    let isHovered = (mx > leftX && mx < rightX && my < this.currentH + 10);
+    let isHovered = (this.y > -50 && mx > leftX && mx < rightX && my < this.currentH + 10);
     
     let targetW; let targetH;
     if(isHovered){
@@ -540,7 +554,7 @@ class OrderTicket extends UIBase {
   }
 
   display(orderText) {
-    if (!orderText) return;
+    if (this.y < -200) return;
     let style = UI_STYLE.ticket;
     let leftX = this.x - (this.currentW/2);
 
